@@ -21,9 +21,33 @@ Tài liệu học tập và trình bày cho môn Data Visualization.
 
 ## Cách xem slide
 
-Mở trực tiếp các file HTML trong trình duyệt:
+Chạy từ Terminal:
 
-- `Chap18/Chap18_Slide.html`
-- `Chap34/Chap34_Slide.html`
+```bash
+open Chap18/Chap18_Slide.html
+open Chap34/Chap34_Slide.html
+```
+
+Hoặc mở từng chapter:
+
+```bash
+open Chap18/Chap18_Slide.html
+```
+
+```bash
+open Chap34/Chap34_Slide.html
+```
 
 Trong bản HTML, có thể dùng phím mũi tên, Space hoặc nút điều hướng để chuyển slide.
+
+Nếu muốn dùng `make`:
+
+```bash
+make open-slide
+```
+
+Các target có sẵn:
+
+- `make open-slide`: mở slide của cả Chap18 và Chap34.
+- `make open-chap18`: mở slide Chap18.
+- `make open-chap34`: mở slide Chap34.
