@@ -1,0 +1,704 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Chap18 Slide - Server Process Monitoring</title>
+  <style>
+    :root {
+      --bg: #eef2f6;
+      --slide: #ffffff;
+      --ink: #1f2933;
+      --muted: #52606d;
+      --accent: #b91c1c;
+      --accent-soft: #fee2e2;
+      --line: #d9e2ec;
+      --shadow: 0 24px 70px rgba(15, 23, 42, 0.18);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at top left, #ffffff 0, var(--bg) 38%, #d9e2ec 100%);
+      color: var(--ink);
+      font-family: Arial, Helvetica, sans-serif;
+      overflow: hidden;
+    }
+
+    .deck {
+      height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 34px 34px 82px;
+    }
+
+    .slide {
+      width: min(1280px, calc(100vw - 68px));
+      aspect-ratio: 16 / 9;
+      display: none;
+      position: relative;
+      overflow: hidden;
+      padding: 54px 68px;
+      background: var(--slide);
+      border: 1px solid rgba(217, 226, 236, 0.9);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    .slide.active {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .slide::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 8px;
+      background: linear-gradient(90deg, var(--accent), #6b7280);
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin: 0;
+    }
+
+    h1 {
+      max-width: 860px;
+      font-size: clamp(44px, 5.2vw, 72px);
+      line-height: 1.04;
+      letter-spacing: 0;
+    }
+
+    h2 {
+      font-size: clamp(34px, 3.4vw, 48px);
+      line-height: 1.12;
+      letter-spacing: 0;
+    }
+
+    h3 {
+      font-size: 30px;
+      line-height: 1.18;
+    }
+
+    p,
+    li {
+      font-size: clamp(22px, 2vw, 30px);
+      line-height: 1.35;
+    }
+
+    ul,
+    ol {
+      margin: 0;
+      padding-left: 34px;
+    }
+
+    li + li {
+      margin-top: 12px;
+    }
+
+    strong,
+    .accent {
+      color: var(--accent);
+      font-weight: 800;
+    }
+
+    .lead {
+      color: var(--muted);
+      font-size: clamp(27px, 2.6vw, 38px);
+      line-height: 1.28;
+    }
+
+    .meta {
+      display: grid;
+      gap: 12px;
+      margin-top: auto;
+      padding: 22px 26px;
+      background: #f8fafc;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+    }
+
+    .question-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+      padding: 0;
+      list-style: none;
+    }
+
+    .question-list li,
+    .card {
+      padding: 22px 24px;
+      background: #f8fafc;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 0.92fr 1.08fr;
+      gap: 36px;
+      align-items: center;
+      min-height: 0;
+      flex: 1;
+    }
+
+    .two-col.equal {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .image-wrap {
+      display: grid;
+      place-items: center;
+      min-height: 0;
+      flex: 1;
+      width: 100%;
+      border-radius: 14px;
+      background: #f8fafc;
+      border: 1px solid var(--line);
+      padding: 14px;
+    }
+
+    .image-wrap.compact {
+      flex: 0 0 auto;
+      height: 310px;
+    }
+
+    .image-wrap.medium {
+      flex: 0 0 auto;
+      height: 350px;
+    }
+
+    .image-wrap.split-media {
+      height: 100%;
+      min-height: 0;
+    }
+
+    .image-wrap.top-media {
+      flex: 0 0 auto;
+      height: 365px;
+    }
+
+    .image-wrap.wide-top-media {
+      flex: 0 0 auto;
+      height: 420px;
+      padding: 18px;
+    }
+
+    .image-wrap.clean {
+      background: transparent;
+      border: 0;
+      padding: 0;
+    }
+
+    img {
+      display: block;
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      border-radius: 10px;
+    }
+
+    .full-image {
+      max-height: 500px;
+    }
+
+    .slide.tight {
+      gap: 16px;
+      padding-top: 42px;
+      padding-bottom: 42px;
+    }
+
+    .slide.tight h2 {
+      font-size: 40px;
+    }
+
+    .slide.tight p,
+    .slide.tight li {
+      font-size: 24px;
+      line-height: 1.26;
+    }
+
+    .slide.tight li + li {
+      margin-top: 7px;
+    }
+
+    .supporting-points {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin-top: 0;
+    }
+
+    .media-text {
+      display: grid;
+      grid-template-columns: minmax(0, 1.12fr) minmax(360px, 0.88fr);
+      gap: 28px;
+      align-items: stretch;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .text-panel {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 18px;
+      padding: 26px 28px;
+      background: #f8fafc;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+    }
+
+    .text-panel p,
+    .text-panel li {
+      font-size: 25px;
+    }
+
+    .below-text {
+      display: grid;
+      gap: 10px;
+      padding: 18px 24px;
+      background: #f8fafc;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+    }
+
+    .below-text.compact-list ul {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px 24px;
+      padding-left: 26px;
+    }
+
+    .below-text.compact-list li {
+      font-size: 23px;
+      line-height: 1.22;
+      margin-top: 0;
+    }
+
+    .caption {
+      color: var(--muted);
+      font-size: 20px;
+      line-height: 1.35;
+      text-align: center;
+    }
+
+    .takeaways {
+      display: grid;
+      gap: 18px;
+      list-style: none;
+      padding: 0;
+      counter-reset: takeaway;
+    }
+
+    .takeaways li {
+      counter-increment: takeaway;
+      position: relative;
+      padding: 22px 24px 22px 72px;
+      background: #f8fafc;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+    }
+
+    .takeaways li::before {
+      content: counter(takeaway);
+      position: absolute;
+      left: 22px;
+      top: 20px;
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-weight: 800;
+    }
+
+    .qa {
+      margin-top: auto;
+      text-align: center;
+      font-size: 72px;
+      font-weight: 800;
+      color: var(--accent);
+    }
+
+    .controls {
+      position: fixed;
+      left: 50%;
+      bottom: 22px;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transform: translateX(-50%);
+      padding: 10px 12px;
+      border: 1px solid rgba(217, 226, 236, 0.95);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.88);
+      box-shadow: 0 12px 40px rgba(15, 23, 42, 0.14);
+      backdrop-filter: blur(10px);
+    }
+
+    button {
+      min-width: 44px;
+      height: 40px;
+      padding: 0 14px;
+      border: 0;
+      border-radius: 999px;
+      background: #1f2933;
+      color: #ffffff;
+      font-size: 20px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.4;
+    }
+
+    .counter {
+      min-width: 88px;
+      color: var(--muted);
+      font-size: 16px;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .hint {
+      position: fixed;
+      right: 24px;
+      bottom: 30px;
+      color: #6b7280;
+      font-size: 14px;
+    }
+
+    @media (max-width: 900px) {
+      body {
+        overflow: auto;
+      }
+
+      .deck {
+        min-height: 100vh;
+        height: auto;
+        padding: 18px 18px 82px;
+      }
+
+      .slide {
+        width: calc(100vw - 36px);
+        min-height: calc((100vw - 36px) * 0.5625);
+        height: auto;
+        aspect-ratio: auto;
+        padding: 38px 28px;
+      }
+
+      .two-col,
+      .two-col.equal,
+      .question-list {
+        grid-template-columns: 1fr;
+      }
+
+      .hint {
+        display: none;
+      }
+    }
+
+    :fullscreen body,
+    body:fullscreen {
+      background: #ffffff;
+    }
+
+    :fullscreen .deck {
+      width: 100vw;
+      height: 100vh;
+      padding: 0;
+      background: #ffffff;
+    }
+
+    :fullscreen .slide {
+      width: 100vw;
+      height: 100vh;
+      aspect-ratio: auto;
+      border: 0;
+      border-radius: 0;
+      box-shadow: none;
+    }
+
+    :fullscreen .slide.active {
+      display: flex;
+    }
+
+    :fullscreen .controls,
+    :fullscreen .hint {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <main class="deck" aria-live="polite">
+    <section class="slide active">
+      <h1>Giám sát quá trình xử lý của máy chủ</h1>
+      <p class="lead">Chapter 18: Server Process Monitoring</p>
+      <div class="meta">
+        <p>Dashboard designer: <strong>Mark Jackson</strong></p>
+        <p>Organization: <strong>Piedmont Healthcare</strong></p>
+        <p>Chủ đề: dashboard giám sát tiến trình bị trễ hoặc thất bại trong ngày</p>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Bối cảnh nghiệp vụ</h2>
+      <p>Một BI manager cần đảm bảo hệ thống dữ liệu:</p>
+      <ul>
+        <li>Online trước khi nhân viên bắt đầu ngày làm việc</li>
+        <li>Có dữ liệu mới nhất sau các tiến trình chạy qua đêm</li>
+        <li>Báo sớm nếu có tiến trình lỗi hoặc chạy chậm bất thường</li>
+      </ul>
+      <p><strong>Vấn đề chính:</strong> nếu phát hiện lỗi muộn, người dùng sẽ bị ảnh hưởng trước khi đội quản trị kịp xử lý.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Dashboard cần trả lời câu hỏi gì?</h2>
+      <ol class="question-list">
+        <li>Các tiến trình server hôm nay có thành công không?</li>
+        <li>Tiến trình nào đã thất bại?</li>
+        <li>Các lỗi đó có lặp lại nhiều lần không?</li>
+        <li>Tiến trình nào đang mất nhiều thời gian hơn bình thường?</li>
+      </ol>
+      <p><strong>Mục tiêu:</strong> đi từ cảnh báo tổng quan đến nguyên nhân cụ thể càng nhanh càng tốt.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Dashboard tổng quan</h2>
+      <div class="image-wrap">
+        <img class="full-image" src="figure/dashboard_overview.png" alt="Server process monitoring dashboard overview">
+      </div>
+      <p class="caption">Dashboard gồm biểu đồ cột 14 ngày, Gantt chart trong ngày và vùng xem chi tiết khi cần.</p>
+    </section>
+
+    <section class="slide tight">
+      <h2>Luồng khám phá dữ liệu</h2>
+      <div class="media-text">
+        <div class="image-wrap split-media">
+          <img src="figure/fig18.5_Dashboard_good_top_down_workflow.png" alt="Luồng phân tích từ trên xuống dưới">
+        </div>
+        <div class="text-panel">
+          <ol class="supporting-points">
+            <li><strong>Overview:</strong> xem hiệu suất server những ngày gần đây</li>
+            <li><strong>Zoom/filter:</strong> chọn một ngày có vấn đề</li>
+            <li><strong>Details on demand:</strong> click task để xem chi tiết hoặc mở URL xử lý</li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide tight">
+      <h2>Biểu đồ cột: phát hiện ngày bất thường</h2>
+      <div class="image-wrap wide-top-media">
+        <img src="figure/col_chart.png" alt="Biểu đồ cột tỷ lệ lỗi 14 ngày">
+      </div>
+      <div class="below-text compact-list">
+        <ul>
+          <li>Hiển thị tỷ lệ lỗi của <strong>14 ngày gần nhất</strong></li>
+          <li>Ngày mới nhất nằm ở phía bên phải</li>
+          <li>Đường nét đứt biểu thị <strong>mức lỗi trung bình</strong></li>
+          <li>Ngày 20/3 có <strong>6.7% tiến trình thất bại</strong></li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Biểu đồ Gantt: đọc trạng thái tiến trình</h2>
+      <div class="image-wrap">
+        <img src="figure/fig18.4_Dot_line.png" alt="Gantt chart với đường tham chiếu">
+      </div>
+      <ul>
+        <li>Thanh <strong>xám</strong>: tiến trình thành công</li>
+        <li>Thanh <strong>đỏ</strong>: tiến trình thất bại</li>
+        <li>Đường <strong>nét đứt</strong>: thời điểm dự kiến bắt đầu</li>
+        <li>Đường <strong>nét liền</strong>: thời lượng trung bình của tiến trình</li>
+      </ul>
+    </section>
+
+    <section class="slide tight">
+      <h2>Tooltip: thêm ngữ cảnh để xử lý lỗi</h2>
+      <div class="media-text">
+        <div class="image-wrap split-media">
+          <img src="figure/fig18.1_The_tool_tip.png" alt="Tooltip bổ sung chi tiết về lỗi">
+        </div>
+        <div class="text-panel">
+          <ul class="supporting-points">
+            <li>Hover vào task để xem thông tin chi tiết</li>
+            <li>Cho biết thời gian chạy, trạng thái và mô tả lỗi</li>
+            <li>Có URL để đi thẳng đến hệ thống/server liên quan</li>
+          </ul>
+          <p><strong>Ý nghĩa:</strong> dashboard không chỉ báo lỗi, mà còn rút ngắn bước điều tra tiếp theo.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide tight">
+      <h2>Detail view: lỗi có lặp lại không?</h2>
+      <div class="media-text">
+        <div class="image-wrap split-media">
+          <img src="figure/fig18.2_Detail_view.png" alt="Detail view cho Epic Radiant Orders">
+        </div>
+        <div class="text-panel">
+          <ul class="supporting-points">
+            <li>Xem lịch sử riêng của một tiến trình trong khoảng 1 tháng</li>
+            <li>Epic Radiant Orders đã thất bại <strong>7 lần</strong></li>
+            <li>Các lần lỗi thường gắn với việc bắt đầu muộn</li>
+          </ul>
+          <p><strong>Kết luận:</strong> đây có thể là lỗi có tính hệ thống, không phải sự cố đơn lẻ.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide tight">
+      <h2>Vì sao đặt nhãn ngay trên Gantt bar?</h2>
+      <div class="image-wrap top-media">
+        <img src="figure/fig18.3_Label_position_compare.png" alt="So sánh vị trí nhãn Gantt bar">
+      </div>
+      <div class="below-text">
+        <ul class="supporting-points">
+          <li>Cách phổ biến: đặt tên task ở lề trái</li>
+          <li>Cách Mark chọn: đặt nhãn gần ngay thanh Gantt</li>
+          <li>Khi thấy thanh đỏ, mắt người xem thấy luôn tên tiến trình</li>
+        </ul>
+        <p><strong>Đánh đổi:</strong> hơi rối hơn, nhưng phản ứng nhanh hơn.</p>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Điểm mạnh và hạn chế thiết kế</h2>
+      <div class="two-col equal">
+        <div class="card">
+          <h3>Điểm mạnh</h3>
+          <ul>
+            <li>Đơn giản, ít thành phần thừa</li>
+            <li>Trả lời đúng 3 câu hỏi chính mỗi sáng</li>
+            <li>Dẫn người dùng từ cảnh báo đến hành động</li>
+            <li>Dùng màu đỏ/xám rõ nghĩa</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Hạn chế</h3>
+          <ul>
+            <li>Một số nhãn bị chồng lên đường tham chiếu</li>
+            <li>Gantt chart có thể rối nếu nhiều tiến trình hơn</li>
+            <li>Phù hợp với người dùng cá nhân hơn là toàn tổ chức</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Kết luận</h2>
+      <h3>3 bài học chính</h3>
+      <ol class="takeaways">
+        <li>Dashboard tốt bắt đầu từ <strong>câu hỏi nghiệp vụ rõ ràng</strong></li>
+        <li>Thiết kế hiệu quả cần dẫn người dùng từ <strong>tổng quan đến chi tiết</strong></li>
+        <li>Với dashboard vận hành, giá trị lớn nhất là <strong>phát hiện nhanh và hành động nhanh</strong></li>
+      </ol>
+      <div class="qa">Q&amp;A</div>
+    </section>
+  </main>
+
+  <nav class="controls" aria-label="Điều hướng slide">
+    <button id="prev" type="button" aria-label="Slide trước">‹</button>
+    <div class="counter"><span id="current">1</span> / <span id="total">12</span></div>
+    <button id="next" type="button" aria-label="Slide tiếp theo">›</button>
+    <button id="fullscreen" type="button" aria-label="Bật toàn màn hình" title="Toàn màn hình">⛶</button>
+  </nav>
+  <div class="hint">Dùng ← / → hoặc Space để chuyển slide, F để bật toàn màn hình</div>
+
+  <script>
+    const slides = Array.from(document.querySelectorAll(".slide"));
+    const current = document.getElementById("current");
+    const total = document.getElementById("total");
+    const prev = document.getElementById("prev");
+    const next = document.getElementById("next");
+    const fullscreen = document.getElementById("fullscreen");
+    let index = 0;
+
+    total.textContent = slides.length;
+
+    function showSlide(nextIndex) {
+      index = Math.min(Math.max(nextIndex, 0), slides.length - 1);
+      slides.forEach((slide, slideIndex) => {
+        slide.classList.toggle("active", slideIndex === index);
+      });
+      current.textContent = index + 1;
+      prev.disabled = index === 0;
+      next.disabled = index === slides.length - 1;
+      const hash = `#${index + 1}`;
+      if (window.location.hash !== hash) {
+        history.replaceState(null, "", hash);
+      }
+    }
+
+    prev.addEventListener("click", () => showSlide(index - 1));
+    next.addEventListener("click", () => showSlide(index + 1));
+
+    async function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        await document.documentElement.requestFullscreen();
+      } else {
+        await document.exitFullscreen();
+      }
+    }
+
+    function syncFullscreenButton() {
+      const isFullscreen = Boolean(document.fullscreenElement);
+      fullscreen.textContent = isFullscreen ? "×" : "⛶";
+      fullscreen.title = isFullscreen ? "Thoát toàn màn hình" : "Toàn màn hình";
+      fullscreen.setAttribute("aria-label", isFullscreen ? "Thoát toàn màn hình" : "Bật toàn màn hình");
+    }
+
+    fullscreen.addEventListener("click", () => {
+      toggleFullscreen().catch(() => {});
+    });
+
+    document.addEventListener("fullscreenchange", syncFullscreenButton);
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "ArrowRight" || event.key === "PageDown" || event.key === " ") {
+        event.preventDefault();
+        showSlide(index + 1);
+      }
+      if (event.key === "ArrowLeft" || event.key === "PageUp") {
+        event.preventDefault();
+        showSlide(index - 1);
+      }
+      if (event.key === "Home") {
+        event.preventDefault();
+        showSlide(0);
+      }
+      if (event.key === "End") {
+        event.preventDefault();
+        showSlide(slides.length - 1);
+      }
+      if (event.key.toLowerCase() === "f") {
+        event.preventDefault();
+        toggleFullscreen().catch(() => {});
+      }
+    });
+
+    const hashIndex = Number.parseInt(window.location.hash.replace("#", ""), 10);
+    showSlide(Number.isFinite(hashIndex) ? hashIndex - 1 : 0);
+    syncFullscreenButton();
+  </script>
+</body>
+</html>
