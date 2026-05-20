@@ -58,6 +58,7 @@ Chapter 18: Server Process Monitoring
 - Dashboard designer: Mark Jackson
 - Organization: Piedmont Healthcare
 - Chủ đề: dashboard giám sát tiến trình bị trễ hoặc thất bại trong ngày
+- Thuyết trình bởi: Nhóm 2
 
 <!--
 Speaker notes:
@@ -199,6 +200,8 @@ Nếu một tiến trình fail 7 lần, đội quản trị cần điều tra ng
 -->
 
 ---
+
+<!-- _style: "img { max-height: 430px !important; } @media (min-height: 900px) { img { max-height: 56vh !important; } }" -->
 
 ## Vì sao đặt nhãn ngay trên Gantt bar?
 

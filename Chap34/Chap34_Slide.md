@@ -58,6 +58,7 @@ Chapter 34: The Allure of Pies and Donuts
 - Chủ đề: khi nào pie/donut chart có thể dùng được
 - Trọng tâm: so sánh định lượng và các phương án thỏa hiệp
 - Thông điệp chính: nếu buộc phải dùng biểu đồ tròn, hãy bổ sung cách mã hóa dễ đọc hơn
+- Thuyết trình bởi: Nhóm 2
 
 <!--
 Speaker notes:

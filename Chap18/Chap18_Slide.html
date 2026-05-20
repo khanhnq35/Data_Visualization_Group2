@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="vi">
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -102,7 +103,7 @@
       padding-left: 34px;
     }
 
-    li + li {
+    li+li {
       margin-top: 12px;
     }
 
@@ -189,6 +190,14 @@
       height: 365px;
     }
 
+    .slide.image-priority .image-wrap.top-media {
+      height: 430px;
+    }
+
+    .slide.image-priority.with-below .image-wrap.top-media {
+      height: 400px;
+    }
+
     .image-wrap.wide-top-media {
       flex: 0 0 auto;
       height: 420px;
@@ -229,7 +238,7 @@
       line-height: 1.26;
     }
 
-    .slide.tight li + li {
+    .slide.tight li+li {
       margin-top: 7px;
     }
 
@@ -440,12 +449,21 @@
       display: flex;
     }
 
+    :fullscreen .slide.image-priority .image-wrap.top-media {
+      height: calc(100vh - 190px);
+    }
+
+    :fullscreen .slide.image-priority.with-below .image-wrap.top-media {
+      height: calc(100vh - 370px);
+    }
+
     :fullscreen .controls,
     :fullscreen .hint {
       display: none;
     }
   </style>
 </head>
+
 <body>
   <main class="deck" aria-live="polite">
     <section class="slide active">
@@ -455,6 +473,7 @@
         <p>Dashboard designer: <strong>Mark Jackson</strong></p>
         <p>Organization: <strong>Piedmont Healthcare</strong></p>
         <p>Chủ đề: dashboard giám sát tiến trình bị trễ hoặc thất bại trong ngày</p>
+        <p>Thuyết trình bởi: <strong>Nhóm 2</strong></p>
       </div>
     </section>
 
@@ -466,7 +485,8 @@
         <li>Có dữ liệu mới nhất sau các tiến trình chạy qua đêm</li>
         <li>Báo sớm nếu có tiến trình lỗi hoặc chạy chậm bất thường</li>
       </ul>
-      <p><strong>Vấn đề chính:</strong> nếu phát hiện lỗi muộn, người dùng sẽ bị ảnh hưởng trước khi đội quản trị kịp xử lý.</p>
+      <p><strong>Vấn đề chính:</strong> nếu phát hiện lỗi muộn, người dùng sẽ bị ảnh hưởng trước khi đội quản trị kịp xử
+        lý.</p>
     </section>
 
     <section class="slide">
@@ -566,7 +586,7 @@
       </div>
     </section>
 
-    <section class="slide tight">
+    <section class="slide tight image-priority with-below">
       <h2>Vì sao đặt nhãn ngay trên Gantt bar?</h2>
       <div class="image-wrap top-media">
         <img src="figure/fig18.3_Label_position_compare.png" alt="So sánh vị trí nhãn Gantt bar">
@@ -668,7 +688,7 @@
     }
 
     fullscreen.addEventListener("click", () => {
-      toggleFullscreen().catch(() => {});
+      toggleFullscreen().catch(() => { });
     });
 
     document.addEventListener("fullscreenchange", syncFullscreenButton);
@@ -692,7 +712,7 @@
       }
       if (event.key.toLowerCase() === "f") {
         event.preventDefault();
-        toggleFullscreen().catch(() => {});
+        toggleFullscreen().catch(() => { });
       }
     });
 
@@ -701,4 +721,5 @@
     syncFullscreenButton();
   </script>
 </body>
+
 </html>
