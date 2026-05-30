@@ -1,0 +1,11 @@
+/* Custom màu cho RangeSlider của Dash */
+.rc-slider-track { 
+    background-color: #4f81bd !important; 
+}
+.rc-slider-handle { 
+    border-color: #4f81bd !important; 
+    border-width: 2px !important; 
+}
+.rc-slider-dot-active { 
+    border-color: #4f81bd !important; 
+}
