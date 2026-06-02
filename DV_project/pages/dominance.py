@@ -140,8 +140,7 @@ def layout() -> html.Div:
                 "Explore historical World Cup dominance patterns by teams and continents.",
             ),
             html.Div(
-                className="filter-panel",
-                style={"gridTemplateColumns": "minmax(280px, 1.4fr) repeat(3, minmax(160px, 0.7fr)) auto"},
+                className="filter-panel dominance-filter-panel",
                 children=[
                     html.Div(
                         className="filter-block",
@@ -218,7 +217,9 @@ def layout() -> html.Div:
                                             "cursor": "pointer",
                                             "fontSize": "13px",
                                             "fontWeight": "600",
-                                            "height": "38px"
+                                            "height": "38px",
+                                            "width": "100%",
+                                            "minWidth": "80px"
                                         },
                                     ),
                                     html.Button(
@@ -232,7 +233,9 @@ def layout() -> html.Div:
                                             "cursor": "pointer",
                                             "fontSize": "13px",
                                             "color": "var(--muted)",
-                                            "height": "38px"
+                                            "height": "38px",
+                                            "width": "100%",
+                                            "minWidth": "80px"
                                         },
                                     ),
                                 ]
@@ -242,8 +245,7 @@ def layout() -> html.Div:
                 ],
             ),
             html.Div(
-                className="kpi-grid",
-                style={"gridTemplateColumns": "repeat(4, minmax(140px, 1fr))"},
+                className="kpi-grid-4",
                 children=[
                     kpi_card("Tournaments", "dominance-kpi-tournaments"),
                     kpi_card("Teams", "dominance-kpi-teams"),

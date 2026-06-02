@@ -27,8 +27,7 @@ def layout() -> html.Div:
                 "Tournament scale, scoring trend, and champion history from 1930 to 2022.",
             ),
             html.Div(
-                className="filter-panel",
-                style={"gridTemplateColumns": "minmax(280px, 1.4fr) repeat(2, minmax(180px, 0.8fr)) auto"},
+                className="filter-panel overview-filter-panel",
                 children=[
                     html.Div(
                         className="filter-block filter-wide",
@@ -86,7 +85,9 @@ def layout() -> html.Div:
                                     "cursor": "pointer",
                                     "fontSize": "13px",
                                     "fontWeight": "600",
-                                    "height": "38px"
+                                    "height": "38px",
+                                    "width": "100%",
+                                    "minWidth": "110px"
                                 },
                             ),
                         ],

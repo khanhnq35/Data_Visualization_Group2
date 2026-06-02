@@ -167,8 +167,7 @@ def layout() -> html.Div:
             ),
             # Year filter
             html.Div(
-                className="filter-panel",
-                style={"gridTemplateColumns": "200px auto"},
+                className="filter-panel tournament-filter-panel",
                 children=[
                     html.Div(
                         className="filter-block",
@@ -200,7 +199,8 @@ def layout() -> html.Div:
                                     "fontSize": "13px",
                                     "fontWeight": "600",
                                     "height": "38px",
-                                    "width": "120px"
+                                    "width": "100%",
+                                    "minWidth": "120px"
                                 },
                             ),
                         ],
@@ -210,13 +210,11 @@ def layout() -> html.Div:
             # Top-4 KPI cards
             html.Div(
                 id="tournament-top4-cards",
-                className="kpi-grid",
-                style={"gridTemplateColumns": "repeat(4, minmax(140px, 1fr))"},
+                className="kpi-grid-4",
             ),
             # Meta strip
             html.Div(
-                className="kpi-grid",
-                style={"gridTemplateColumns": "repeat(5, minmax(120px, 1fr))"},
+                className="kpi-grid-5",
                 children=[
                     _kpi_card("Host Country",      "tournament-meta-host"),
                     _kpi_card("Teams",             "tournament-meta-teams"),
@@ -229,14 +227,14 @@ def layout() -> html.Div:
             html.Div(
                 className="chart-grid two-column",
                 children=[
-                    html.Div(className="chart-card", style={"minHeight": "500px"},
+                    html.Div(className="chart-card", style={"minHeight": "700px"},
                              children=dcc.Graph(id="tournament-goals-for-chart",
                                                 config={"displayModeBar": False, "responsive": True},
-                                                style={"height": "100%", "minHeight": "500px"})),
-                    html.Div(className="chart-card", style={"minHeight": "500px"},
+                                                style={"height": "700px"})),
+                    html.Div(className="chart-card", style={"minHeight": "700px"},
                              children=dcc.Graph(id="tournament-goals-against-chart",
                                                 config={"displayModeBar": False, "responsive": True},
-                                                style={"height": "100%", "minHeight": "500px"})),
+                                                style={"height": "700px"})),
                 ],
             ),
             # Scatter
@@ -344,20 +342,43 @@ def register_callbacks(app) -> None:
         if gf_df.empty:
             fig_gf = empty_figure(f"Sức tấn công {year}")
         else:
+            # Tạo ticktext giãn cách để không bị mất nhãn của Top 8
+            other_counter = 0
+            tickvals = []
+            ticktext = []
+            for _, row in gf_df.iterrows():
+                lbl = row["Label"]
+                tickvals.append(lbl)
+                if row["position_group"] in ["Champion", "Top 4", "Top 8"]:
+                    ticktext.append(lbl)
+                else:
+                    if other_counter % 2 == 0:
+                        ticktext.append(lbl)
+                    else:
+                        ticktext.append("")
+                    other_counter += 1
+
             fig_gf = px.bar(
                 gf_df, x="Goals For", y="Label", orientation="h",
                 color="position_group", color_discrete_map=POS_COLORS,
                 title=f"Bàn ghi được — {year}",
-                labels={"Goals For": "Bàn ghi", "Label": "", "position_group": "Nhóm"},
+                labels={"Goals For": "", "Label": "", "position_group": "Nhóm"},
                 custom_data=["Team"],
             )
-            apply_chart_layout(fig_gf, height=max(400, len(gf_df) * 28))
+            apply_chart_layout(fig_gf, height=700)
             fig_gf.update_layout(
                 title_font_size=14,
-                margin={"l": 55, "r": 16, "t": 44, "b": 80},
-                legend={"orientation": "h", "yanchor": "top", "y": -0.09, "xanchor": "left", "x": 0, "font": {"size": 11}},
+                margin={"l": 55, "r": 16, "t": 44, "b": 100},
+                legend={"orientation": "h", "yanchor": "top", "y": -0.15, "xanchor": "left", "x": 0, "font": {"size": 11}},
+                bargap=0.18,
             )
-            fig_gf.update_yaxes(categoryorder="array", categoryarray=gf_df["Label"])
+            fig_gf.update_yaxes(
+                tickmode="array",
+                tickvals=tickvals,
+                ticktext=ticktext,
+                categoryorder="array",
+                categoryarray=gf_df["Label"]
+            )
             fig_gf.update_traces(hovertemplate="%{customdata[0]}<br>Bàn ghi: %{x}<extra></extra>")
 
         # ── Goals Against chart ───────────────────────────────────────────────
@@ -368,20 +389,43 @@ def register_callbacks(app) -> None:
         if ga_df.empty:
             fig_ga = empty_figure(f"Phòng ngự {year}")
         else:
+            # Tạo ticktext giãn cách để không bị mất nhãn của Top 8
+            other_counter = 0
+            tickvals = []
+            ticktext = []
+            for _, row in ga_df.iterrows():
+                lbl = row["Label"]
+                tickvals.append(lbl)
+                if row["position_group"] in ["Champion", "Top 4", "Top 8"]:
+                    ticktext.append(lbl)
+                else:
+                    if other_counter % 2 == 0:
+                        ticktext.append(lbl)
+                    else:
+                        ticktext.append("")
+                    other_counter += 1
+
             fig_ga = px.bar(
                 ga_df, x="Goals Against", y="Label", orientation="h",
                 color="position_group", color_discrete_map=POS_COLORS,
                 title=f"Bàn thủng lưới — {year}",
-                labels={"Goals Against": "Bàn thủng", "Label": "", "position_group": "Nhóm"},
+                labels={"Goals Against": "", "Label": "", "position_group": "Nhóm"},
                 custom_data=["Team"],
             )
-            apply_chart_layout(fig_ga, height=max(400, len(ga_df) * 28))
+            apply_chart_layout(fig_ga, height=700)
             fig_ga.update_layout(
                 title_font_size=14,
-                margin={"l": 55, "r": 16, "t": 44, "b": 80},
-                legend={"orientation": "h", "yanchor": "top", "y": -0.09, "xanchor": "left", "x": 0, "font": {"size": 11}},
+                margin={"l": 55, "r": 16, "t": 44, "b": 100},
+                legend={"orientation": "h", "yanchor": "top", "y": -0.15, "xanchor": "left", "x": 0, "font": {"size": 11}},
+                bargap=0.18,
             )
-            fig_ga.update_yaxes(categoryorder="array", categoryarray=ga_df["Label"])
+            fig_ga.update_yaxes(
+                tickmode="array",
+                tickvals=tickvals,
+                ticktext=ticktext,
+                categoryorder="array",
+                categoryarray=ga_df["Label"]
+            )
             fig_ga.update_traces(hovertemplate="%{customdata[0]}<br>Bàn thủng: %{x}<extra></extra>")
 
         # ── Scatter ───────────────────────────────────────────────────────────
