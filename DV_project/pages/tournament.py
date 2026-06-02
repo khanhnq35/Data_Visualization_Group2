@@ -3,6 +3,7 @@ from __future__ import annotations
 import glob
 import os
 import pandas as pd
+import plotly.express as px
 from dash import dcc, html, dash_table, Input, Output
 
 from src.components import graph_card, kpi_card, page_header
