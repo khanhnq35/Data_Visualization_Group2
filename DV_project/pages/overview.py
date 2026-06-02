@@ -160,25 +160,37 @@ def _scale_figure(df: pd.DataFrame) -> go.Figure:
         fig.update_yaxes(title_text=label, row=index, col=1)
 
     fig.update_layout(
-        title="Từ 13 lên 32 Đội: Cuộc Bành Trướng 92 Năm của World Cup",
+        title="Quy mô World Cup theo năm (1930–2022)",
         showlegend=False,
     )
     fig.update_xaxes(title_text="Năm", row=3, col=1)
 
-    # Strategic annotations
+    # Annotation tại 1998 — bước nhảy quy mô
     if 1998 in df["year"].values:
         fig.add_annotation(
             x=1998, y=df.loc[df["year"] == 1998, "teams"].values[0],
-            text="1998: Mở rộng lên 32 đội", showarrow=True, arrowhead=2,
-            ax=60, ay=-30, font={"size": 10, "color": COLORS["muted"]},
+            text="1998: 32 đội", showarrow=True, arrowhead=2,
+            ax=55, ay=-28, font={"size": 10, "color": COLORS["muted"]},
             row=1, col=1,
         )
-    if 1998 in df["year"].values:
         fig.add_annotation(
             x=1998, y=df.loc[df["year"] == 1998, "matches_played"].values[0],
-            text="64 trận từ 1998", showarrow=True, arrowhead=2,
-            ax=60, ay=-30, font={"size": 10, "color": COLORS["muted"]},
+            text="64 trận", showarrow=True, arrowhead=2,
+            ax=45, ay=-28, font={"size": 10, "color": COLORS["muted"]},
             row=2, col=1,
+        )
+
+    # Annotation tổng bàn thắng cao nhất và thấp nhất
+    if len(df) > 1:
+        idx_max_g = df["goals_scored"].idxmax()
+        yr_max_g = int(df.loc[idx_max_g, "year"])
+        val_max_g = int(df.loc[idx_max_g, "goals_scored"])
+        fig.add_annotation(
+            x=yr_max_g, y=val_max_g,
+            text=f"{yr_max_g}: {val_max_g} bàn",
+            showarrow=True, arrowhead=2, ax=50, ay=-30,
+            font={"size": 10, "color": COLORS["muted"]},
+            row=3, col=1,
         )
 
     return apply_chart_layout(fig, height=620)
@@ -195,7 +207,7 @@ def _avg_goals_figure(df: pd.DataFrame) -> go.Figure:
             x=df["year"],
             y=df["avg_goals_per_game"],
             mode="lines+markers",
-            line={"width": 3, "color": COLORS["accent_3"]},
+            line={"width": 3, "color": COLORS["accent"]},
             marker={"size": 8},
             hovertemplate="Year: %{x}<br>Avg goals/game: %{y:.2f}<extra></extra>",
             name="Avg goals/game",
@@ -230,7 +242,7 @@ def _avg_goals_figure(df: pd.DataFrame) -> go.Figure:
             font={"size": 10, "color": COLORS["muted"]},
         )
 
-    fig.update_layout(title="Bàn Thắng/Trận: Đỉnh cao 1954, Đáy thấp 1990 — Xu hướng hiện đại ổn định")
+    fig.update_layout(title="Trung bình bàn thắng / trận")
     fig.update_xaxes(title="Năm")
     fig.update_yaxes(title="Bàn thắng/trận")
     return apply_chart_layout(fig, height=400)
@@ -278,8 +290,19 @@ def _champion_timeline_figure(df: pd.DataFrame) -> go.Figure:
             )
         )
 
+    # Annotation "5 lần" cho đội nhiều nhất
+    brazil_rows = df[df["champion_norm"] == "Brazil"]
+    if not brazil_rows.empty:
+        last_brazil_year = int(brazil_rows["year"].max())
+        fig.add_annotation(
+            x=last_brazil_year + 3, y="Brazil",
+            text="5 lần", showarrow=False,
+            font={"size": 12, "color": COLORS["accent_2"]},
+            xanchor="left",
+        )
+
     fig.update_layout(
-        title="8 Triều Đại Thống Trị: Ai Sở Hữu Chiếc Cúp Vàng Suốt 92 Năm?",
+        title="Lịch sử nhà vô địch World Cup (1930–2022)",
         showlegend=True,
         legend={"orientation": "h", "yanchor": "bottom", "y": 1.02, "xanchor": "right", "x": 1},
     )

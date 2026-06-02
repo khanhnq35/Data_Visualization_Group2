@@ -334,22 +334,33 @@ def register_callbacks(app) -> None:
         champion_counts = champion_counts.sort_values("titles", ascending=True)  # True for clean horizontal bar ordering
 
         if champion_counts.empty:
-            champion_fig = empty_figure("Championship Count by Team", "No title winners in selection")
+            champion_fig = empty_figure("Số lần vô địch theo đội", "Không có dữ liệu. Thử mở rộng bộ lọc hoặc chọn lại châu lục / đội.")
         else:
+            top20 = champion_counts.tail(20).copy()
+            max_team = top20.loc[top20["titles"].idxmax(), "Team"]
+            bar_colors = [COLORS["accent_2"] if t == max_team else "#cbd5e1" for t in top20["Team"]]
             champion_fig = px.bar(
-                champion_counts.tail(20),
+                top20,
                 x="titles",
                 y="Team",
                 orientation="h",
-                title="Bức Tường Pha Lê: 9 Đội Chia Nhau 22 Chức Vô Địch Trong 92 Năm",
+                title="Số lần vô địch theo đội",
                 labels={"titles": "Số lần vô địch", "Team": ""},
-                color_discrete_sequence=[COLORS["accent"]],
             )
+            champion_fig.update_traces(marker_color=bar_colors)
             apply_chart_layout(champion_fig, height=380)
-            max_titles = int(champion_counts["titles"].max()) if not champion_counts.empty else 0
+            max_titles = int(top20["titles"].max())
             champion_fig.update_layout(
+                showlegend=False,
                 yaxis={"automargin": True, "title": None},
-                xaxis={"dtick": 1, "tick0": 0, "title": "Number of Titles"},
+                xaxis={"dtick": 1, "tick0": 0, "title": "Số lần vô địch"},
+            )
+            # Annotation trực tiếp bên phải bar đội nhiều nhất
+            champion_fig.add_annotation(
+                x=max_titles, y=max_team,
+                text=f"{max_titles} lần",
+                showarrow=False, xanchor="left", xshift=6,
+                font={"size": 12, "color": COLORS["accent_2"]},
             )
 
         top4_by_continent = (
@@ -360,21 +371,38 @@ def register_callbacks(app) -> None:
         )
 
         if top4_by_continent.empty:
-            top4_fig = empty_figure("Top 4 Finishes by Continent", "No top 4 teams in selection")
+            top4_fig = empty_figure("Số suất Top 4 theo châu lục", "Không có dữ liệu. Thử mở rộng bộ lọc.")
         else:
             top4_fig = px.bar(
                 top4_by_continent,
                 x="Year",
                 y="top4_count",
                 color="continent",
-                title="Châu Âu & Nam Mỹ: Hai Đại Lục Thống Trị Các Suất Top 4",
+                title="Số suất Top 4 theo châu lục qua các kỳ",
                 labels={"top4_count": "Số suất Top 4", "continent": "Châu lục"},
             )
             apply_chart_layout(top4_fig, height=380)
             top4_fig.update_layout(
-                yaxis={"dtick": 1, "tick0": 0, "title": "Top 4 Finishes"},
-                xaxis={"title": "World Cup Edition"},
+                yaxis={"dtick": 1, "tick0": 0, "title": "Số suất Top 4"},
+                xaxis={"title": "Năm", "tickangle": -45},
             )
+            # vrect phân tách giai đoạn thể thức
+            for x0, x1, label, x_label in [
+                (1928, 1956, "13–16 đội", 1938),
+                (1956, 1984, "16 đội", 1968),
+                (1984, 1996, "24 đội", 1989),
+                (1996, 2024, "32 đội", 2008),
+            ]:
+                top4_fig.add_vrect(
+                    x0=x0, x1=x1,
+                    fillcolor="#f0f4f8", opacity=0.25,
+                    layer="below", line_width=0,
+                )
+                top4_fig.add_annotation(
+                    x=x_label, y=4.3, text=label,
+                    showarrow=False,
+                    font={"size": 9, "color": COLORS["muted"]},
+                )
 
         goals_by_team = (
             filtered.groupby("Team")
@@ -384,21 +412,34 @@ def register_callbacks(app) -> None:
         )
 
         if goals_by_team.empty:
-            goals_fig = empty_figure("Goals Scored by Team (Top 20)", "No data in selection")
+            goals_fig = empty_figure("Tổng bàn thắng — Top 20 đội", "Không có dữ liệu. Thử mở rộng bộ lọc.")
         else:
+            goals_by_team["goals_per_appearance"] = (
+                goals_by_team["total_goals_for"] / goals_by_team["appearances"].replace(0, pd.NA)
+            ).round(1).fillna(0)
+            top20_goals = goals_by_team.tail(20).copy()
             goals_fig = px.bar(
-                goals_by_team.tail(20),
+                top20_goals,
                 x="total_goals_for",
                 y="Team",
                 orientation="h",
-                title="Sức Mạnh Ghi Bàn Tích Lũy: Top 20 Đội Nhiều Bàn Nhất Lịch Sử",
+                title="Tổng bàn thắng — Top 20 đội (lịch sử)",
                 labels={"total_goals_for": "Tổng bàn thắng", "Team": ""},
                 color_discrete_sequence=[COLORS["accent_2"]],
+                custom_data=["appearances", "goals_per_appearance"],
             )
             apply_chart_layout(goals_fig, height=450)
             goals_fig.update_layout(
                 yaxis={"automargin": True, "title": None},
-                xaxis={"title": "Goals For"},
+                xaxis={"title": "Tổng bàn thắng"},
+            )
+            goals_fig.update_traces(
+                hovertemplate=(
+                    "<b>%{y}</b><br>"
+                    "Tổng bàn thắng: %{x}<br>"
+                    "Số lần tham dự: %{customdata[0]}<br>"
+                    "Trung bình: %{customdata[1]} bàn/kỳ<extra></extra>"
+                )
             )
 
         table_data = [] if filtered.empty else team_summary.to_dict("records")

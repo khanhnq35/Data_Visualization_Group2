@@ -346,7 +346,7 @@ def register_callbacks(app) -> None:
             fig_ga = px.bar(
                 ga_df, x="Goals Against", y="Label", orientation="h",
                 color="position_group", color_discrete_map=POS_COLORS,
-                title=f"Bàn thủng lưới — {year}  (ít hơn = tốt hơn)",
+                title=f"Bàn thủng lưới — {year}",
                 labels={"Goals Against": "Bàn thủng", "Label": "", "position_group": "Nhóm"},
                 custom_data=["Team"],
             )
@@ -390,6 +390,17 @@ def register_callbacks(app) -> None:
                 x=max_val * 0.6, y=max_val * 0.6,
                 text="GF = GA", showarrow=False,
                 font={"size": 10, "color": COLORS["muted"]}, textangle=-35,
+            )
+            # Annotation vùng hướng dẫn đọc chart
+            fig_sc.add_annotation(
+                x=max_val * 0.12, y=max_val * 0.82,
+                text="Nhiều GA hơn GF<br>(thiên phòng ngự)",
+                showarrow=False, font={"size": 9, "color": COLORS["muted"]}, align="center",
+            )
+            fig_sc.add_annotation(
+                x=max_val * 0.82, y=max_val * 0.12,
+                text="Nhiều GF hơn GA<br>(thiên tấn công)",
+                showarrow=False, font={"size": 9, "color": COLORS["muted"]}, align="center",
             )
             fig_sc.update_layout(
                 yaxis_autorange="reversed",
@@ -459,7 +470,7 @@ def _build_insight_panel(year: int) -> html.Div:
         },
         {
             "team": "France \U0001f1eb\U0001f1f7",
-            "color": COLORS["accent_3"],
+            "color": COLORS["accent"],
             "text": "The defending champions were fierce to the end — Mbappe's hat-trick in the final made it the most dramatic World Cup final in history. France's 16 goals was the joint-highest of any team.",
         },
         {

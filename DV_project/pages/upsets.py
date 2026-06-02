@@ -278,7 +278,7 @@ def _scatter_figure(df: pd.DataFrame):
         color_discrete_map={True: COLOR_UPSET, False: COLOR_NORMAL},
         custom_data=_custom_data_columns(),
         labels={"rank_gap": "Chênh lệch hạng FIFA", "home_goal_diff": "Chênh lệch bàn thắng"},
-        title="Đội Yếu Hơn Vẫn Thắng: Hạng FIFA Không Quyết Định Tất Cả",
+        title="Hạng FIFA và kết quả trận đấu",
     )
     fig.update_traces(
         marker={"size": 6, "line": {"width": 0.5, "color": "white"}, "opacity": 0.6},
@@ -300,13 +300,34 @@ def _scatter_figure(df: pd.DataFrame):
     )
     fig.add_hline(y=0, line_dash="dash", line_color=COLORS["border"], opacity=0.8)
     fig.add_vline(x=0, line_dash="dash", line_color=COLORS["border"], opacity=0.8)
+
+    # Annotation vùng quadrant
+    if not df.empty:
+        max_rg = float(df["rank_gap"].quantile(0.92))
+        max_gd = float(df["home_goal_diff"].quantile(0.88))
+        min_gd = float(df["home_goal_diff"].quantile(0.08))
+        fig.add_annotation(
+            x=max_rg * 0.65, y=max_gd * 0.7,
+            text="Đội yếu hơn nhưng THẮNG<br>(upset!)",
+            showarrow=False,
+            font={"size": 9, "color": COLOR_UPSET},
+            align="center",
+        )
+        fig.add_annotation(
+            x=max_rg * 0.65, y=min_gd * 0.65,
+            text="Đội yếu hơn, thua nhiều<br>(dự đoán được)",
+            showarrow=False,
+            font={"size": 9, "color": COLORS["muted"]},
+            align="center",
+        )
+
     return apply_chart_layout(fig, height=480)
 
 
 def _top_upsets_figure(df: pd.DataFrame):
     upsets_df = df[df["is_upset"]].sort_values("upset_rank_gap", ascending=False).head(5)
     if upsets_df.empty:
-        return empty_figure("Top 5 Biggest Upsets", "No upsets for the selected filters.")
+        return empty_figure("Top 5 upset lớn nhất theo chênh lệch hạng", "Không có upset. Thử mở rộng bộ lọc.")
 
     fig = px.bar(
         upsets_df,
@@ -316,7 +337,7 @@ def _top_upsets_figure(df: pd.DataFrame):
         text="match_short_label",
         custom_data=_custom_data_columns(),
         color_discrete_sequence=[COLOR_UPSET],
-        title="5 Cú Sốc Lớn Nhất: Khi Đội Yếu Đánh Bại Người Khổng Lồ",
+        title="Top 5 upset lớn nhất theo chênh lệch hạng",
     )
     fig.update_traces(
         textposition="inside",
@@ -361,7 +382,7 @@ def _neutral_result_figure(df: pd.DataFrame):
         custom_data=["match_result", "count"],
         color_discrete_map={"Home Win": COLOR_HOME, "Away Win": COLOR_AWAY, "Draw": COLOR_DRAW},
         labels={"neutral_label": "", "percentage": "Tỷ lệ (%)", "match_result": "Kết quả"},
-        title="Lợi Thế Sân Nhà Biến Mất ở Sân Trung Lập — Tỷ Lệ Thắng Giảm Rõ Rệt",
+        title="Kết quả trận theo loại địa điểm thi đấu",
     )
     fig.update_traces(
         textfont={"color": "white"},

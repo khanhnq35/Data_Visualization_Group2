@@ -94,7 +94,7 @@ Dashboard FIFA World Cup là một ứng dụng phân tích dữ liệu được
 
 ### 4.2 Hạn chế
 
-1. **Tiêu đề biểu đồ mô tả thuần túy, thiếu insight:** Tất cả tiêu đề hiện tại ("Championship Count by Team", "Rank Gap vs Goal Difference", "Average Goals per Game") chỉ mô tả nội dung, không truyền tải thông điệp. Chương 9 yêu cầu "Action Titles" như "Nhóm Elite vẫn thống trị" hoặc "Bức tường Pha lê" thay vì tiêu đề kỹ thuật.
+1. **Tiêu đề biểu đồ chưa nhất quán với chuẩn mô tả rõ ràng:** Một số tiêu đề như "Rank Gap vs Goal Difference" quá kỹ thuật, khó hiểu với người xem phổ thông. Nguyên tắc: **tiêu đề nên là câu mô tả ngắn gọn, chính xác** — không cần chứa insight. Insight phải tự hiện ra qua **design của biểu đồ**: annotation, highlight màu, reference line, và cấu trúc visual. Người xem nhìn vào phải hiểu insight mà không cần đọc thêm bất kỳ chú thích nào.
 
 2. **Không có Strategic Annotations trên biểu đồ:** Biểu đồ line chart trong `overview.py` (`_scale_figure`, `_avg_goals_figure`) không có chú thích tại các mốc lịch sử quan trọng (1954 kỷ lục bàn thắng, 1990 thấp nhất, 1998 mở rộng lên 32 đội). Chương 9 đề xuất dùng `fig.add_annotation()` để dẫn dắt người xem như bản đồ hành quân Minard.
 
@@ -114,7 +114,7 @@ Dashboard FIFA World Cup là một ứng dụng phân tích dữ liệu được
 
 | Ưu tiên | Vấn đề | File ảnh hưởng | Chương liên quan | Mức độ tác động |
 |---|---|---|---|---|
-| P0 — Bắt buộc | Tiêu đề biểu đồ thiếu insight, chỉ mô tả kỹ thuật | Tất cả 4 trang | Chương 1, 9 | Storytelling thất bại |
+| P0 — Bắt buộc | Tiêu đề biểu đồ chưa chuẩn — một số quá kỹ thuật, một số quá dài. Cần tiêu đề **ngắn, mô tả rõ** — insight phải tự hiện ra qua design (annotation, highlight, reference line) | Tất cả 4 trang | Chương 3, 6, 9 | Người xem không hiểu được insight nếu chỉ nhìn vào biểu đồ |
 | P0 — Bắt buộc | Cặp màu đỏ-xanh trong `POS_COLORS` không CVD-safe | `tournament.py`, `theme.py` | Chương 6, 8, 9 | Accessibility nghiêm trọng |
 | P1 — Quan trọng | Thiếu Strategic Annotations trên line charts | `overview.py` | Chương 9 | Thiếu ngữ cảnh lịch sử |
 | P1 — Quan trọng | Thiếu đường reference GF=GA trên scatter tournament | `tournament.py` | Chương 6 | Khó đọc tương quan |
@@ -148,11 +148,11 @@ Dashboard FIFA World Cup là một ứng dụng phân tích dữ liệu được
 
 | Thay đổi đề xuất | Cách thực hiện | Chương cơ sở | Ưu tiên |
 |---|---|---|---|
-| Đổi tiêu đề thành "Từ 13 lên 32 đội: Cuộc cách mạng quy mô World Cup" | `fig.update_layout(title=...)` | Chương 1, 9 | P0 |
-| Thêm annotation tại 1998: `fig.add_annotation(x=1998, text="→ 32 đội từ năm này")` | `fig.add_annotation()` trên subplot row=1 | Chương 9 | P1 |
-| Thêm annotation tại 1954 và 1990 trên subplot bàn thắng | `fig.add_annotation()` với `arrowhead=2` | Chương 9 | P1 |
-| Thêm subtitle giải thích ý nghĩa storytelling | `page_header()` description text thêm con số cụ thể | Chương 1 | P1 |
-| Chuyển sang Index Chart (tất cả series bắt đầu từ 100%) cho phiên bản tùy chọn | Normalize từng series bằng `(df[col] / df[col].iloc[0] * 100)` | Chương 1 | P3 |
+| Tiêu đề ngắn gọn: **"Quy mô World Cup theo năm"** — không cần insight trong title | `fig.update_layout(title=...)` | Chương 6 | P0 |
+| **Annotation tại 1998** trên subplot Teams: "32 đội" với mũi tên → người xem tự thấy bước nhảy | `fig.add_annotation(x=1998, text="32 đội", arrowhead=2)` trên subplot row=1 | Chương 3, 9 | P1 |
+| **Highlight điểm bước ngoặt** bằng marker lớn hơn/màu khác tại 1998 — preattentive pop-out | `marker={"size": [12 if y==1998 else 7 for y in df["year"]]}` | Chương 3 | P1 |
+| Annotation tại năm có bàn thắng cao nhất và thấp nhất trên subplot Goals — tự hiện insight | `fig.add_annotation()` tại max/min của `goals_scored` | Chương 3, 9 | P1 |
+| Chuyển sang Index Chart (series bắt đầu từ 100%) — tùy chọn bonus | Normalize series | Chương 1 | P3 |
 
 ---
 
@@ -167,16 +167,16 @@ Dashboard FIFA World Cup là một ứng dụng phân tích dữ liệu được
 - Annotation trung bình đặt "bottom right" hợp lý.
 
 **Hạn chế:**
-- Tiêu đề "Average Goals per Game" chỉ mô tả, không cung cấp insight về xu hướng.
-- Không có annotation tại 1954 (5.4 bàn/trận — cao nhất lịch sử) và 1990 (2.2 bàn/trận — thấp nhất) dù `dashboard_storytelling.md` nhấn mạnh đây là "điểm Outlier lịch sử".
-- Màu `COLORS["accent_3"]` (đỏ `#c44536`) cho đường duy nhất — không có lý do sử dụng màu cảnh báo (alert color) cho xu hướng tổng quát, gây hiểu nhầm.
+- Tiêu đề "Average Goals per Game" đúng về mô tả nhưng chưa chuẩn về ngôn ngữ — nên Việt hóa cho nhất quán.
+- Không có annotation tại 1954 (5.4 bàn/trận — cao nhất lịch sử) và 1990 (2.2 bàn/trận — thấp nhất): **đây là nơi insight phải nằm trong biểu đồ, không phải trong title**.
+- Màu `COLORS["accent_3"]` (đỏ `#c44536`) cho đường duy nhất — màu cảnh báo không phù hợp cho xu hướng trung tính.
 
 | Thay đổi đề xuất | Cách thực hiện | Chương cơ sở | Ưu tiên |
 |---|---|---|---|
-| Đổi tiêu đề thành "Bàn thắng/trận: Đỉnh cao 1954, đáy thấp 1990" | `fig.update_layout(title=...)` | Chương 9 | P0 |
-| Đổi màu đường sang `COLORS["accent"]` (teal) — màu trung tính, không dùng màu cảnh báo | `line={"color": COLORS["accent"]}` | Chương 1, 6 | P1 |
-| Thêm annotation tại điểm max và min của series | `fig.add_annotation(x=year_max, y=val_max, ...)` | Chương 9 | P1 |
-| Thêm marker shape tam giác tại 1954 và 1990 để tạo preattentive pop-out | `marker={"symbol": "triangle-up"}` cho các điểm đặc biệt | Chương 3 | P2 |
+| Tiêu đề ngắn chuẩn: **"Trung bình bàn thắng / trận"** | `fig.update_layout(title=...)` | Chương 6 | P0 |
+| **Annotation trực tiếp** tại điểm max (1954: "5.4 — Kỷ lục") và min (1990: "2.2 — Thấp nhất") — người xem thấy insight không cần đọc title | `fig.add_annotation()` tại max/min, `font_size=11`, màu muted | Chương 3, 9 | P1 |
+| **Highlight 2 điểm outlier** bằng marker khác (symbol="diamond", size=12) để tạo pop-out preattentive | `marker={"symbol": [...], "size": [...]}` theo điều kiện | Chương 3 | P1 |
+| Đổi màu đường sang `COLORS["accent"]` (teal) — màu trung tính, không gây liên tưởng cảnh báo | `line={"color": COLORS["accent"]}` | Chương 6 | P1 |
 
 ---
 
@@ -195,15 +195,15 @@ Dashboard FIFA World Cup là một ứng dụng phân tích dữ liệu được
 - `marker_sizes` mã hóa số đội (Q-Ratio) bằng Size (Area/Diện tích) — theo Mackinlay, Area xếp hạng thứ 5 cho Q, thấp hơn nhiều so với Position và Length. Người xem khó ước tính chính xác rằng 32 đội = 2.46 lần 13 đội từ kích thước bubble (Chương 2, 3).
 - Hai màu (host thắng vs không thắng) cần legend nhưng `showlegend=False`. Người xem không hiểu ý nghĩa màu xanh vs teal mà không đọc tooltip.
 - Không có annotation cho các đội thống trị (Brazil 5 lần, Germany 4 lần) — thiếu Pop-out Effect (Chương 3).
-- Tiêu đề "Champion Timeline" không kể chuyện.
+- Tiêu đề "Champion Timeline" đủ ngắn gọn nhưng chưa rõ phạm vi thời gian.
 
 | Thay đổi đề xuất | Cách thực hiện | Chương cơ sở | Ưu tiên |
 |---|---|---|---|
-| Bỏ mã hóa Size, thay bằng uniform size (8px) — Size không truyền đạt số đội hiệu quả | `marker={"size": 8}` thay vì `marker_sizes` | Chương 2, 3 | P1 |
-| Bật legend với label rõ ràng "Host wins" / "Away win" | `showlegend=True`, đặt tên trace | Chương 3 | P1 |
-| Đổi tiêu đề thành "8 Triều đại thống trị: Ai sở hữu chiếc cúp vàng suốt 92 năm?" | `title=...` | Chương 9 | P0 |
-| Thêm annotation text bên cạnh Brazil (5 chấm) và Germany/West Germany (4 chấm) | `fig.add_annotation()` | Chương 9 | P2 |
-| Dùng Shape hình sao (marker_symbol="star") cho các kỳ host thắng — dễ nhận biết hơn màu | `marker={"symbol": "star"}` cho host_won | Chương 3 | P2 |
+| Tiêu đề ngắn chuẩn: **"Lịch sử nhà vô địch World Cup (1930–2022)"** | `fig.update_layout(title=...)` | Chương 6 | P0 |
+| Bỏ mã hóa Size, thay bằng uniform size (12px) — insight về số đội đưa vào tooltip | `marker={"size": 12}` thay vì `marker_sizes` | Chương 2, 3 | P1 |
+| Bật legend rõ ràng: "Chủ nhà vô địch ★" / "Đội khách vô địch ●" — người xem tự thấy pattern | `showlegend=True`, tên trace mô tả | Chương 3 | P1 |
+| **Annotation trực tiếp** tại hàng Brazil: "5 lần vô địch" — người xem thấy ngay đội nào thống trị nhiều nhất | `fig.add_annotation(x=..., y="Brazil", text="5 lần")` | Chương 3, 9 | P2 |
+| Dùng symbol="star" cho host thắng — shape khác biệt dễ nhận hơn chỉ dùng màu | `marker={"symbol": "star"}` cho host_won | Chương 3 | P2 |
 
 ---
 
@@ -220,16 +220,15 @@ Dashboard FIFA World Cup là một ứng dụng phân tích dữ liệu được
 
 **Hạn chế:**
 - Tất cả bars cùng màu (`COLORS["accent"]` — teal) — mất cơ hội làm nổi bật (highlight) Brazil/Germany bằng màu khác biệt (Chương 1, 3).
-- Tiêu đề "Championship Count by Team" chỉ mô tả.
-- Không phân biệt châu lục của đội — mất thông tin định danh (N) quan trọng cho storyline.
-- `dtick: 1` nhưng không có grid ý nghĩa khi số lần vô địch chạy từ 0–5.
+- Tiêu đề "Championship Count by Team" đúng nhưng là tiếng Anh, chưa nhất quán với phần còn lại.
+- Tất cả bars cùng màu teal — mất cơ hội **highlight Brazil/Germany bằng màu nổi bật** để người xem thấy ngay ai thống trị mà không cần đọc số.
 
 | Thay đổi đề xuất | Cách thực hiện | Chương cơ sở | Ưu tiên |
 |---|---|---|---|
-| Đổi tiêu đề thành "Bức tường Pha lê: 8 Đội chia nhau 22 chức vô địch" | `title=...` | Chương 9 | P0 |
-| Tô màu bars theo châu lục của đội — thêm `color="continent"` | Thêm continent vào `champion_counts` bằng `merge()` với `team_summary` | Chương 1, 2 | P1 |
-| Highlight Brazil (bar teal đậm), các đội khác xám — kỹ thuật "Muted Gray" | `color_discrete_map={"Brazil": COLORS["accent"], ...: "#cbd5e1"}` | Chương 1, 3 | P2 |
-| Thêm annotation bên phải bar Brazil: "5 lần — Nhiều nhất lịch sử" | `fig.add_annotation()` | Chương 9 | P2 |
+| Tiêu đề ngắn chuẩn: **"Số lần vô địch theo đội"** | `title=...` | Chương 6 | P0 |
+| **Highlight Brazil** bằng màu amber đậm, các đội khác muted gray — người xem thấy ngay đội nhiều nhất mà không đọc trục | `color_discrete_map={"Brazil": COLORS["accent_2"], default: "#cbd5e1"}` | Chương 3 | P1 |
+| **Annotation trực tiếp** bên phải bar Brazil: "5 lần" — insight tự hiện ra | `fig.add_annotation(x=5, y="Brazil", text="5 lần", showarrow=False)` | Chương 3, 9 | P1 |
+| Tô màu bars theo châu lục — người xem thấy pattern EU/SA chiếm ưu thế qua màu sắc | `color="continent"` với bảng màu cố định | Chương 2 | P2 |
 
 ---
 
@@ -252,10 +251,10 @@ Dashboard FIFA World Cup là một ứng dụng phân tích dữ liệu được
 
 | Thay đổi đề xuất | Cách thực hiện | Chương cơ sở | Ưu tiên |
 |---|---|---|---|
-| Đổi tiêu đề thành "Châu Âu & Nam Mỹ: Hai đại lục phân chia 95% ghế Top 4" | `title=...` | Chương 9 | P0 |
-| Thêm `vrect` (vùng hình chữ nhật dọc) phân tách giai đoạn thể thức giải (1930–54, 1958–82, 1986–94, 1998–nay) | `fig.add_vrect(x0=1930, x1=1954, ...)` | Chương 3, 9 | P2 |
-| Giới hạn số màu: gộp "North America", "Asia", "Africa", "Oceania" thành "Rest of World" nếu ít lần top 4 | Tạo cột `continent_grouped` trước khi vẽ | Chương 3 | P2 |
-| Xoay nhãn X: `fig.update_xaxes(tickangle=-45)` | `update_xaxes()` | Chương 6 | P1 |
+| Tiêu đề ngắn chuẩn: **"Số suất Top 4 theo châu lục qua các kỳ"** | `title=...` | Chương 6 | P0 |
+| **Gộp châu lục ít xuất hiện** thành "Phần còn lại" — giảm màu, EU và SA nổi bật hơn → người xem thấy ngay 2 châu lục thống trị | `continent_grouped` column | Chương 3 | P1 |
+| **Vrect phân tách giai đoạn** thể thức (13/16/24/32 đội) → người xem thấy pattern thay đổi theo thời kỳ | `fig.add_vrect(x0=1930, x1=1950, fillcolor=..., opacity=0.05)` | Chương 3, 9 | P2 |
+| Xoay nhãn X 45° tránh chồng chéo | `update_xaxes(tickangle=-45)` | Chương 6 | P1 |
 
 ---
 
@@ -277,7 +276,7 @@ Dashboard FIFA World Cup là một ứng dụng phân tích dữ liệu được
 | Thay đổi đề xuất | Cách thực hiện | Chương cơ sở | Ưu tiên |
 |---|---|---|---|
 | Thêm cột bàn thắng/lần tham dự làm tooltip bổ sung | `hovertemplate="... Avg: {gf/app:.1f}/tournament"` | Chương 2, 8 | P1 |
-| Đổi tiêu đề thành "Sức mạnh ghi bàn tích lũy: Top 20 đội nhiều bàn nhất lịch sử" | `title=...` | Chương 9 | P1 |
+| Tiêu đề ngắn chuẩn: **"Tổng bàn thắng — Top 20 đội (lịch sử)"** | `title=...` | Chương 6 | P1 |
 | Thu gọn về `chart-card` thay vì `chart-wide` nếu không phải Hero Chart | CSS layout | Chương 4 | P2 |
 
 ---
@@ -326,7 +325,7 @@ Dashboard FIFA World Cup là một ứng dụng phân tích dữ liệu được
 
 | Thay đổi đề xuất | Cách thực hiện | Chương cơ sở | Ưu tiên |
 |---|---|---|---|
-| Đổi tiêu đề thành "Đội yếu hơn vẫn thắng: Rank Gap không quyết định tất cả" | `title=...` | Chương 9 | P0 |
+| Tiêu đề ngắn chuẩn: **"Chênh lệch hạng FIFA vs chênh lệch bàn thắng"** — insight tự hiện qua màu cam (upset) nổi bật | `title=...` | Chương 6 | P0 |
 | Đổi màu upset sang Orange (`#f97316`) thay vì đỏ — CVD-safe hơn | `COLOR_UPSET = "#f97316"` trong `upsets.py` | Chương 6, 8, 9 | P0 |
 | Đổi tên trace legend: "Upset (Đội yếu thắng)" / "Normal" | `fig.for_each_trace(lambda t: t.update(name=...))` | Chương 3 | P1 |
 | Giảm `marker.size` xuống 5 và thêm `opacity=0.3` global cho toàn scatter khi dataset lớn | `fig.update_traces(marker={"size":5, "opacity":0.3})` rồi override upset | Chương 6 | P1 |
@@ -353,7 +352,7 @@ Dashboard FIFA World Cup là một ứng dụng phân tích dữ liệu được
 |---|---|---|---|
 | Thêm dropdown chọn N (Top 5/10/20) | Thêm `dcc.Dropdown` cho số lượng hiển thị | Chương 8 | P2 |
 | Thêm đường tham chiếu "median rank gap" làm vline | `fig.add_vline(x=median_gap, ...)` | Chương 4 | P2 |
-| Đổi tiêu đề thành "5 Cú sốc lớn nhất: Khi Goliath bị David hạ gục" | `title=...` | Chương 9 | P0 |
+| Tiêu đề ngắn chuẩn: **"Top 5 upset lớn nhất theo chênh lệch hạng"** | `title=...` | Chương 6 | P0 |
 
 ---
 
@@ -375,8 +374,9 @@ Dashboard FIFA World Cup là một ứng dụng phân tích dữ liệu được
 
 | Thay đổi đề xuất | Cách thực hiện | Chương cơ sở | Ưu tiên |
 |---|---|---|---|
-| Đổi `COLOR_HOME` sang Blue (`#1d4ed8`), `COLOR_AWAY` sang Orange (`#f97316`) | `COLOR_HOME = "#1d4ed8"`, `COLOR_AWAY = "#f97316"` | Chương 6, 8, 9 | P0 |
-| Đổi tiêu đề thành "Lợi thế sân nhà biến mất ở sân trung lập — Tỷ lệ thắng giảm X%" | Tính X% trong callback | Chương 9 | P1 |
+| Đổi `COLOR_HOME` sang Blue (`#1d4ed8`), `COLOR_AWAY` sang Orange (`#f97316`) — CVD-safe | `COLOR_HOME = "#1d4ed8"`, `COLOR_AWAY = "#f97316"` | Chương 6 | P0 |
+| Tiêu đề ngắn chuẩn: **"Kết quả trận theo loại địa điểm thi đấu"** — insight tự hiện khi người xem so sánh 2 cột | `title=...` | Chương 6 | P1 |
+| **Annotation** chênh lệch % thắng của home giữa 2 cột → người xem thấy ngay lợi thế giảm bao nhiêu | `fig.add_annotation()` với text "Thắng sân nhà giảm X%" | Chương 3, 9 | P1 |
 
 ---
 
@@ -398,9 +398,10 @@ Dashboard FIFA World Cup là một ứng dụng phân tích dữ liệu được
 
 | Thay đổi đề xuất | Cách thực hiện | Chương cơ sở | Ưu tiên |
 |---|---|---|---|
-| **Sửa CVD ngay**: Đổi `POS_COLORS["Top 8"]` từ `success (#2f855a)` sang Purple (`#7c3aed`) | `POS_COLORS = {"Champion": "#d98324", "Top 4": "#007c89", "Top 8": "#7c3aed", "Other": "#94a3b8"}` | Chương 6, 8, 9 | **P0 Khẩn cấp** |
-| Đồng nhất thứ tự sắp xếp Goals Against thành `ascending=True` (ít GA ở trên = phòng ngự tốt) | `ga_df.sort_values("Goals Against", ascending=True)` | Chương 3 | P1 |
-| Đổi tiêu đề: "Sức tấn công {year}: Ai ghi nhiều nhất?" và "Phòng ngự {year}: Ai vững chắc nhất?" | `title=f"Sức tấn công {year}..."` | Chương 9 | P0 |
+| **Sửa CVD ngay**: Đổi `POS_COLORS["Top 8"]` từ `success (#2f855a)` sang Purple (`#7c3aed`) | `POS_COLORS = {"Champion": "#d98324", "Top 4": "#007c89", "Top 8": "#7c3aed", "Other": "#94a3b8"}` | Chương 6 | **P0 Khẩn cấp** |
+| Đồng nhất thứ tự sắp xếp Goals Against thành `ascending=True` — ít GA ở trên cùng → người xem thấy ngay đội phòng ngự tốt nhất | `ga_df.sort_values("Goals Against", ascending=True)` | Chương 3 | P1 |
+| Tiêu đề ngắn chuẩn: **"Bàn ghi được — {year}"** và **"Bàn thủng lưới — {year}"** | `title=f"Bàn ghi được — {year}"` | Chương 6 | P0 |
+| **Màu sắc position_group tự nói insight**: Champion (amber) nổi bật nhất → người xem thấy ngay ARG ở đầu bảng mà không cần đọc text | Đảm bảo POS_COLORS contrast đủ mạnh | Chương 3 | P1 |
 
 ---
 
@@ -423,11 +424,10 @@ Dashboard FIFA World Cup là một ứng dụng phân tích dữ liệu được
 
 | Thay đổi đề xuất | Cách thực hiện | Chương cơ sở | Ưu tiên |
 |---|---|---|---|
-| Thêm đường diagonal GF=GA: `fig.add_shape(type="line", x0=0, y0=0, x1=max_val, y1=max_val, line_dash="dot")` | `fig.add_shape()` | Chương 6 | **P1 Quan trọng** |
-| Thêm annotation tại góc phải-trên: "Vùng Elite: nhiều GF, ít GA" | `fig.add_annotation(...)` | Chương 9 | P1 |
-| Bỏ `size=Points` — dùng fixed size, đưa Points vào tooltip | `size=12` trong `marker` | Chương 2, 3 | P2 |
-| **Sửa CVD**: Đổi POS_COLORS như đã đề xuất ở 5.11 | Xem 5.11 | Chương 6, 8, 9 | P0 |
-| Đổi tiêu đề: "Cân bằng tấn công-phòng ngự {year}: Góc phải-trên là vùng của nhà vô địch" | `title=...` | Chương 9 | P0 |
+| **Đường diagonal GF=GA** (nét đứt, màu muted) → người xem tự thấy đội nào thiên tấn công / thiên phòng ngự mà không cần đọc label | `fig.add_shape(type="line", x0=0, y0=0, x1=max_val, y1=max_val, line_dash="dot")` | Chương 6 | **P1 Quan trọng** |
+| **Annotation vùng** góc phải-trên (nhỏ, màu muted): "Nhiều GF, ít GA" → định hướng đọc chart, không cần title dài | `fig.add_annotation(text="Nhiều GF, ít GA", showarrow=False, font_size=10)` | Chương 3 | P1 |
+| Tiêu đề ngắn chuẩn: **"Bàn ghi vs bàn thủng — {year}"** | `title=...` | Chương 6 | P0 |
+| **Sửa CVD**: Đổi POS_COLORS như đã đề xuất ở 5.11 | Xem 5.11 | Chương 6 | P0 |
 
 ---
 
@@ -544,11 +544,11 @@ Style: nền `surface_alt` (`#eef4f5`), border-left 3px solid accent, padding 16
 
 | Act | Trang | Thông điệp cần truyền tải | Tiêu đề biểu đồ hiện tại | Tiêu đề đề xuất | Insight Card đề xuất |
 |---|---|---|---|---|---|
-| Act 1: Mở rộng | Overview | World Cup tăng từ 13→32 đội, nhiều trận hơn, nhiều bàn hơn | "Tournament Scale by Year" | "Từ 13 lên 32 Đội: Cuộc Bành Trướng 92 Năm của World Cup" | "Quy mô tăng 3 lần nhưng số đội từng vô địch vẫn là 9. Phần tiếp theo giải thích tại sao." |
-| Act 2: Thống trị | Dominance | Chỉ EU + SA thống trị Top 4, chỉ 9 đội từng vô địch | "Championship Count by Team" | "Bức Tường Pha Lê: 9 Đội Nắm Giữ 22 Chức Vô Địch Trong 92 Năm" | "Châu Âu 12 chức vô địch. Nam Mỹ 10. Phần còn lại của thế giới: 0. Sự mở rộng là thật, nhưng quyền lực vẫn đứng yên." |
-| Act 3: Bất ngờ | Upsets | Rank cao không đảm bảo thắng — nhiều upset ở cấp trận | "Rank Gap vs Goal Difference" | "Đội Yếu Hơn Vẫn Thắng: Khi Bảng Xếp Hạng FIFA Không Phải Câu Trả Lời" | "Dữ liệu 23,921 trận quốc tế cho thấy kết quả bóng đá phức tạp hơn bất kỳ công thức nào." |
-| Act 4: Case study | Tournament | Argentina + France = Elite; Morocco = ngoại lệ lịch sử | "Goals Scored — 2022" | "Sức Tấn Công 2022: Ai Ghi Nhiều Nhất?" + "Morocco và Cú Rạn Nứt của Trật Tự Cũ" | 2022 insight panel đã có, cần mở rộng cho các năm khác |
-| Kết | Tất cả | World Cup 48 đội (tương lai) sẽ thay đổi hay tiếp tục? | Không có | Thêm "Closing Note" ở trang Overview hoặc Tournament | "Với 48 đội từ 2026, cánh cửa đã rộng hơn. Nhưng lịch sử nói rằng bức tường vẫn còn đó." |
+| Act 1: Mở rộng | Overview | World Cup tăng từ 13→32 đội, nhiều trận hơn, nhiều bàn hơn | "Quy mô World Cup theo năm" | **Annotation tại 1998** trên chart: "32 đội" với mũi tên; **highlight điểm bước nhảy** → người xem thấy ngay mà không đọc title | Insight card trang: "Sau 92 năm, World Cup tăng từ 13 lên 32 đội." |
+| Act 2: Thống trị | Dominance | Chỉ EU + SA thống trị Top 4, chỉ 9 đội từng vô địch | "Số lần vô địch theo đội" | **Highlight Brazil** màu amber đậm + annotation "5 lần" trên bar → người xem thấy ngay ai nhiều nhất; màu stacked bar tự nói EU/SA chiếm ưu thế | Insight card trang: "Chỉ 9 đội chia nhau 22 chức vô địch." |
+| Act 3: Bất ngờ | Upsets | Rank cao không đảm bảo thắng — nhiều upset ở cấp trận | "Chênh lệch hạng FIFA vs chênh lệch bàn thắng" | **Màu cam (upset)** nổi bật trên nền xám → người xem thấy ngay có rất nhiều điểm cam phân tán ở mọi vùng rank gap | Insight card trang: "23,921 trận — đội yếu hơn vẫn thắng thường xuyên hơn bạn nghĩ." |
+| Act 4: Case study | Tournament | Argentina + France = Elite; Morocco = ngoại lệ lịch sử | "Bàn ghi được — 2022" | **Màu amber (Champion)** của ARG nổi bật nhất; **đường GF=GA** tự phân vùng tấn công/phòng ngự; **top 4 cards** tự kể câu chuyện top 4 | 2022 insight panel đã có |
+| Kết | Tất cả | World Cup 48 đội (tương lai) | Không có | Không cần — mạch truyện đã đủ qua 4 trang | Closing note tùy chọn |
 
 ---
 
@@ -564,7 +564,7 @@ Các mục này ảnh hưởng đến tính đúng đắn kỹ thuật, accessib
 
 3. **[KHẨN CẤP — CVD] Sửa màu trong neutral_result chart** — Đổi `COLOR_HOME = COLORS["accent"]` và `COLOR_AWAY = COLORS["accent_3"]` sang Blue/Orange. File: `pages/upsets.py` dòng 14-16.
 
-4. **[P0] Đổi tất cả tiêu đề biểu đồ sang "Action Titles"** — Theo danh sách đề xuất ở Mục 10. Ảnh hưởng: Tất cả hàm `_scale_figure`, `_avg_goals_figure`, `_champion_timeline_figure`, `update_dominance`, `_scatter_figure`, `_top_upsets_figure`, `_neutral_result_figure`, `update_all` trong tất cả 4 page files.
+4. **[P0] Chuẩn hóa tiêu đề biểu đồ** — Ngắn gọn, mô tả đúng nội dung, không cần chứa insight. **Insight phải tự hiện ra qua design**: annotation, highlight màu, reference line, thứ tự sắp xếp. Ảnh hưởng: tất cả hàm `_scale_figure`, `_avg_goals_figure`, `_champion_timeline_figure`, `update_dominance`, `_scatter_figure`, `_top_upsets_figure`, `_neutral_result_figure`, `update_all` trong 4 page files.
 
 5. **[P0] Thêm Insight Card text block đầu mỗi trang** — Thêm `html.Div(className="insight-card", ...)` vào layout của Overview, Dominance, Upsets. CSS style mới trong `assets/styles.css`.
 
@@ -680,12 +680,13 @@ Các mục này ảnh hưởng đến tính đúng đắn kỹ thuật, accessib
 
 ### Checklist Storytelling (Trước khi nộp)
 
-- [ ] **INSIGHT CARDS**: Trang Overview có text block giới thiệu câu chuyện
-- [ ] **INSIGHT CARDS**: Trang Dominance có text block "Bức tường Pha lê"
-- [ ] **INSIGHT CARDS**: Trang Upsets có text block về tỷ lệ upset
-- [ ] **ANNOTATION**: Ít nhất 1 annotation lịch sử trên line charts (1998 hoặc 1954)
+- [ ] **TITLE CHUẨN**: Tất cả tiêu đề ngắn gọn, mô tả đúng nội dung — không có title dài quá 8 từ
+- [ ] **INSIGHT QUA DESIGN**: Người xem nhìn vào biểu đồ phải thấy insight mà **không cần đọc title hay insight card**
+- [ ] **ANNOTATION**: Ít nhất 1 annotation lịch sử trên line charts (1998 hoặc 1954) — thay title dài
+- [ ] **HIGHLIGHT**: Ít nhất 1 chart có element nổi bật hơn phần còn lại (màu, size, annotation)
+- [ ] **INSIGHT CARDS**: Mỗi trang có 1 câu ngắn tóm tắt context — **không phải giải thích chart**
 - [ ] **2022 PANEL**: Insight panel hiển thị đúng khi chọn năm 2022
-- [ ] **NARRATIVE ARC**: Người xem có thể đọc 4 trang theo thứ tự và hiểu câu chuyện
+- [ ] **NARRATIVE ARC**: Người xem đọc 4 trang theo thứ tự và tự hiểu câu chuyện từ visual
 
 ### Checklist Accessibility
 
