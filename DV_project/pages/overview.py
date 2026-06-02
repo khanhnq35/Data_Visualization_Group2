@@ -72,6 +72,16 @@ def layout() -> html.Div:
                 ],
             ),
             html.Div(
+                className="insight-card",
+                children=[
+                    "Sau 92 năm, World Cup đã mở rộng từ ",
+                    html.Strong("13 lên 32 đội"),
+                    " — số trận tăng 4 lần, tổng bàn thắng tăng gấp đôi. "
+                    "Nhưng liệu sự mở rộng đó có thay đổi được trật tự quyền lực? ",
+                    html.Strong("Trang tiếp theo sẽ trả lời."),
+                ],
+            ),
+            html.Div(
                 className="kpi-grid",
                 children=[
                     kpi_card("Tournaments", "overview-kpi-tournaments"),
@@ -126,12 +136,12 @@ def _scale_figure(df: pd.DataFrame) -> go.Figure:
         cols=1,
         shared_xaxes=True,
         vertical_spacing=0.08,
-        subplot_titles=("Teams", "Matches", "Goals"),
+        subplot_titles=("Số đội tham dự", "Số trận đấu", "Tổng bàn thắng"),
     )
     series = [
-        ("teams", "Teams", COLORS["accent"]),
-        ("matches_played", "Matches", COLORS["accent_2"]),
-        ("goals_scored", "Goals", COLORS["success"]),
+        ("teams", "Số đội", COLORS["accent"]),
+        ("matches_played", "Số trận", COLORS["accent_2"]),
+        ("goals_scored", "Bàn thắng", COLORS["success"]),
     ]
     for index, (column, label, color) in enumerate(series, start=1):
         fig.add_trace(
@@ -142,15 +152,35 @@ def _scale_figure(df: pd.DataFrame) -> go.Figure:
                 line={"width": 3, "color": color},
                 marker={"size": 7},
                 name=label,
-                hovertemplate=f"Year: %{{x}}<br>{label}: %{{y:,}}<extra></extra>",
+                hovertemplate=f"Năm: %{{x}}<br>{label}: %{{y:,}}<extra></extra>",
             ),
             row=index,
             col=1,
         )
         fig.update_yaxes(title_text=label, row=index, col=1)
 
-    fig.update_layout(title="Tournament Scale by Year", showlegend=False)
-    fig.update_xaxes(title_text="Year", row=3, col=1)
+    fig.update_layout(
+        title="Từ 13 lên 32 Đội: Cuộc Bành Trướng 92 Năm của World Cup",
+        showlegend=False,
+    )
+    fig.update_xaxes(title_text="Năm", row=3, col=1)
+
+    # Strategic annotations
+    if 1998 in df["year"].values:
+        fig.add_annotation(
+            x=1998, y=df.loc[df["year"] == 1998, "teams"].values[0],
+            text="1998: Mở rộng lên 32 đội", showarrow=True, arrowhead=2,
+            ax=60, ay=-30, font={"size": 10, "color": COLORS["muted"]},
+            row=1, col=1,
+        )
+    if 1998 in df["year"].values:
+        fig.add_annotation(
+            x=1998, y=df.loc[df["year"] == 1998, "matches_played"].values[0],
+            text="64 trận từ 1998", showarrow=True, arrowhead=2,
+            ax=60, ay=-30, font={"size": 10, "color": COLORS["muted"]},
+            row=2, col=1,
+        )
+
     return apply_chart_layout(fig, height=620)
 
 
@@ -175,12 +205,34 @@ def _avg_goals_figure(df: pd.DataFrame) -> go.Figure:
         y=mean_value,
         line_dash="dot",
         line_color=COLORS["muted"],
-        annotation_text=f"Selected mean: {mean_value:.2f}",
+        annotation_text=f"Trung bình: {mean_value:.2f}",
         annotation_position="bottom right",
     )
-    fig.update_layout(title="Average Goals per Game")
-    fig.update_xaxes(title="Year")
-    fig.update_yaxes(title="Goals per game")
+
+    # Annotations tại điểm cực trị lịch sử
+    if not df.empty:
+        idx_max = df["avg_goals_per_game"].idxmax()
+        idx_min = df["avg_goals_per_game"].idxmin()
+        yr_max = df.loc[idx_max, "year"]
+        val_max = df.loc[idx_max, "avg_goals_per_game"]
+        yr_min = df.loc[idx_min, "year"]
+        val_min = df.loc[idx_min, "avg_goals_per_game"]
+        fig.add_annotation(
+            x=yr_max, y=val_max,
+            text=f"{yr_max}: {val_max:.1f} bàn/trận (cao nhất)",
+            showarrow=True, arrowhead=2, ax=50, ay=-30,
+            font={"size": 10, "color": COLORS["muted"]},
+        )
+        fig.add_annotation(
+            x=yr_min, y=val_min,
+            text=f"{yr_min}: {val_min:.1f} bàn/trận (thấp nhất)",
+            showarrow=True, arrowhead=2, ax=50, ay=30,
+            font={"size": 10, "color": COLORS["muted"]},
+        )
+
+    fig.update_layout(title="Bàn Thắng/Trận: Đỉnh cao 1954, Đáy thấp 1990 — Xu hướng hiện đại ổn định")
+    fig.update_xaxes(title="Năm")
+    fig.update_yaxes(title="Bàn thắng/trận")
     return apply_chart_layout(fig, height=400)
 
 
@@ -188,42 +240,51 @@ def _champion_timeline_figure(df: pd.DataFrame) -> go.Figure:
     if df.empty:
         return empty_figure("Champion Timeline")
 
-    marker_colors = [
-        COLORS["success"] if host_won else COLORS["accent"]
-        for host_won in df["host_won"].fillna(False).tolist()
-    ]
-    marker_sizes = (df["teams"].fillna(0).clip(lower=12) * 0.75).tolist()
     customdata = df[["host", "champion", "runner_up", "teams", "matches_played", "goals_scored"]]
 
+    # Tách 2 traces để có legend rõ ràng
+    host_won_mask = df["host_won"].fillna(False)
     fig = go.Figure()
-    fig.add_trace(
-        go.Scatter(
-            x=df["year"],
-            y=df["champion_norm"],
-            mode="markers",
-            marker={
-                "size": marker_sizes,
-                "color": marker_colors,
-                "line": {"width": 1, "color": COLORS["surface"]},
-                "opacity": 0.9,
-            },
-            customdata=customdata,
-            hovertemplate=(
-                "<b>%{y}</b><br>"
-                "Year: %{x}<br>"
-                "Host: %{customdata[0]}<br>"
-                "Champion in raw data: %{customdata[1]}<br>"
-                "Runner-up: %{customdata[2]}<br>"
-                "Teams: %{customdata[3]:,}<br>"
-                "Matches: %{customdata[4]:,}<br>"
-                "Goals: %{customdata[5]:,}<extra></extra>"
-            ),
-            name="Champion",
+
+    for is_host_win, label, color, symbol in [
+        (True,  "Chủ nhà vô địch", COLORS["success"], "star"),
+        (False, "Đội khách vô địch", COLORS["accent"],  "circle"),
+    ]:
+        mask = host_won_mask == is_host_win
+        sub = df[mask]
+        if sub.empty:
+            continue
+        fig.add_trace(
+            go.Scatter(
+                x=sub["year"],
+                y=sub["champion_norm"],
+                mode="markers",
+                marker={
+                    "size": 12,
+                    "color": color,
+                    "symbol": symbol,
+                    "line": {"width": 1, "color": COLORS["surface"]},
+                    "opacity": 0.9,
+                },
+                customdata=sub[["host", "champion", "runner_up", "teams", "matches_played", "goals_scored"]].values,
+                hovertemplate=(
+                    "<b>%{y}</b> — %{x}<br>"
+                    "Chủ nhà: %{customdata[0]}<br>"
+                    "Á quân: %{customdata[2]}<br>"
+                    "Số đội: %{customdata[3]:,} | Trận: %{customdata[4]:,} | Bàn: %{customdata[5]:,}"
+                    "<extra></extra>"
+                ),
+                name=label,
+            )
         )
+
+    fig.update_layout(
+        title="8 Triều Đại Thống Trị: Ai Sở Hữu Chiếc Cúp Vàng Suốt 92 Năm?",
+        showlegend=True,
+        legend={"orientation": "h", "yanchor": "bottom", "y": 1.02, "xanchor": "right", "x": 1},
     )
-    fig.update_layout(title="Champion Timeline", showlegend=False)
-    fig.update_xaxes(title="Year")
-    fig.update_yaxes(title="Champion")
+    fig.update_xaxes(title="Năm")
+    fig.update_yaxes(title="Nhà vô địch")
     return apply_chart_layout(fig, height=440)
 
 

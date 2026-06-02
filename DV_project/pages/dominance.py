@@ -140,6 +140,14 @@ def layout() -> html.Div:
                 "Explore historical World Cup dominance patterns by teams and continents.",
             ),
             html.Div(
+                className="insight-card",
+                children=[
+                    html.Strong("Chỉ 9 đội chia nhau 22 chức vô địch."),
+                    " Châu Âu 12 danh hiệu, Nam Mỹ 10. Phần còn lại của thế giới: ",
+                    html.Strong("0"), ". Sự mở rộng là thật, nhưng quyền lực vẫn đứng yên."
+                ],
+            ),
+            html.Div(
                 className="filter-panel",
                 style={"gridTemplateColumns": "minmax(280px, 1.4fr) repeat(3, minmax(160px, 0.7fr))"},
                 children=[
@@ -333,8 +341,8 @@ def register_callbacks(app) -> None:
                 x="titles",
                 y="Team",
                 orientation="h",
-                title="Championship Count by Team",
-                labels={"titles": "Titles", "Team": "Team"},
+                title="Bức Tường Pha Lê: 9 Đội Chia Nhau 22 Chức Vô Địch Trong 92 Năm",
+                labels={"titles": "Số lần vô địch", "Team": ""},
                 color_discrete_sequence=[COLORS["accent"]],
             )
             apply_chart_layout(champion_fig, height=380)
@@ -359,8 +367,8 @@ def register_callbacks(app) -> None:
                 x="Year",
                 y="top4_count",
                 color="continent",
-                title="Top 4 Finishes by Continent",
-                labels={"top4_count": "Count", "continent": "Continent"},
+                title="Châu Âu & Nam Mỹ: Hai Đại Lục Thống Trị Các Suất Top 4",
+                labels={"top4_count": "Số suất Top 4", "continent": "Châu lục"},
             )
             apply_chart_layout(top4_fig, height=380)
             top4_fig.update_layout(
@@ -383,8 +391,8 @@ def register_callbacks(app) -> None:
                 x="total_goals_for",
                 y="Team",
                 orientation="h",
-                title="Total Goals Scored by Team (Top 20)",
-                labels={"total_goals_for": "Goals For", "Team": "Team"},
+                title="Sức Mạnh Ghi Bàn Tích Lũy: Top 20 Đội Nhiều Bàn Nhất Lịch Sử",
+                labels={"total_goals_for": "Tổng bàn thắng", "Team": ""},
                 color_discrete_sequence=[COLORS["accent_2"]],
             )
             apply_chart_layout(goals_fig, height=450)

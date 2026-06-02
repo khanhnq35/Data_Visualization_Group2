@@ -9,11 +9,11 @@ from src.data import load_upsets_data
 from src.theme import COLORS, apply_chart_layout, empty_figure
 
 
-COLOR_UPSET = COLORS["accent_3"]
-COLOR_NORMAL = "#94a3b8"
-COLOR_HOME = COLORS["accent"]
-COLOR_AWAY = COLORS["accent_3"]
-COLOR_DRAW = "#cbd5e1"
+COLOR_UPSET = "#f97316"    # orange — CVD-safe thay vì đỏ
+COLOR_NORMAL = "#94a3b8"  # grey
+COLOR_HOME = "#1d4ed8"    # blue — CVD-safe
+COLOR_AWAY = "#f97316"    # orange — CVD-safe thay vì đỏ
+COLOR_DRAW = "#cbd5e1"    # grey nhạt
 
 
 def _option_list(values: pd.Series) -> list[dict[str, str]]:
@@ -108,6 +108,18 @@ def layout() -> html.Div:
                             ),
                         ],
                     ),
+                ],
+            ),
+            html.Div(
+                className="insight-card",
+                children=[
+                    "Dữ liệu ",
+                    html.Strong("23,921 trận quốc tế"),
+                    " cho thấy bóng đá phức tạp hơn bất kỳ công thức nào. "
+                    "Đội được xếp hạng thấp hơn vẫn thắng thường xuyên hơn bạn nghĩ — "
+                    "đây là bằng chứng rằng ",
+                    html.Strong("bảng xếp hạng FIFA không quyết định tất cả"),
+                    ".",
                 ],
             ),
             html.Div(id="upsets-kpi-row", className="kpi-grid upsets-kpi-grid"),
@@ -265,21 +277,26 @@ def _scatter_figure(df: pd.DataFrame):
         color="is_upset",
         color_discrete_map={True: COLOR_UPSET, False: COLOR_NORMAL},
         custom_data=_custom_data_columns(),
-        labels={"rank_gap": "Rank Gap", "home_goal_diff": "Goal Difference"},
-        title="Rank Gap vs Goal Difference",
+        labels={"rank_gap": "Chênh lệch hạng FIFA", "home_goal_diff": "Chênh lệch bàn thắng"},
+        title="Đội Yếu Hơn Vẫn Thắng: Hạng FIFA Không Quyết Định Tất Cả",
     )
     fig.update_traces(
-        marker={"size": 7, "line": {"width": 0.5, "color": "white"}},
+        marker={"size": 6, "line": {"width": 0.5, "color": "white"}, "opacity": 0.6},
         hovertemplate=(
             "<b>%{customdata[0]} | %{customdata[1]}</b><br>"
-            "%{customdata[2]} (Rank %{customdata[3]}) "
+            "%{customdata[2]} (Hạng %{customdata[3]}) "
             "<b>%{customdata[4]} - %{customdata[5]}</b> "
-            "%{customdata[7]} (Rank %{customdata[6]})<br>"
-            "Rank gap: %{x}<br>Goal diff: %{y}<extra></extra>"
+            "%{customdata[7]} (Hạng %{customdata[6]})<br>"
+            "Chênh lệch hạng: %{x}<br>Chênh lệch bàn: %{y}<extra></extra>"
         ),
     )
     fig.for_each_trace(
-        lambda trace: trace.update(opacity=0.45) if trace.name == "False" else trace.update(opacity=0.9)
+        lambda trace: trace.update(
+            name="Upset — Đội yếu thắng", opacity=0.9,
+            marker={"size": 7, "line": {"width": 0.5, "color": "white"}},
+        ) if trace.name == "True" else trace.update(
+            name="Kết quả thông thường", opacity=0.3,
+        )
     )
     fig.add_hline(y=0, line_dash="dash", line_color=COLORS["border"], opacity=0.8)
     fig.add_vline(x=0, line_dash="dash", line_color=COLORS["border"], opacity=0.8)
@@ -299,7 +316,7 @@ def _top_upsets_figure(df: pd.DataFrame):
         text="match_short_label",
         custom_data=_custom_data_columns(),
         color_discrete_sequence=[COLOR_UPSET],
-        title="Top 5 Biggest Upsets",
+        title="5 Cú Sốc Lớn Nhất: Khi Đội Yếu Đánh Bại Người Khổng Lồ",
     )
     fig.update_traces(
         textposition="inside",
@@ -307,14 +324,14 @@ def _top_upsets_figure(df: pd.DataFrame):
         textfont={"size": 12, "color": "white"},
         hovertemplate=(
             "<b>%{customdata[0]} | %{customdata[1]}</b><br>"
-            "%{customdata[2]} (Rank %{customdata[3]}) "
+            "%{customdata[2]} (Hạng %{customdata[3]}) "
             "<b>%{customdata[4]} - %{customdata[5]}</b> "
-            "%{customdata[7]} (Rank %{customdata[6]})<br>"
-            "Upset rank gap: %{customdata[8]}<extra></extra>"
+            "%{customdata[7]} (Hạng %{customdata[6]})<br>"
+            "Chênh lệch hạng: %{customdata[8]}<extra></extra>"
         ),
     )
     fig.update_yaxes(title="", categoryorder="total ascending", showticklabels=False)
-    fig.update_xaxes(title="Rank Gap", showgrid=True, gridcolor="#e2e8f0")
+    fig.update_xaxes(title="Chênh lệch hạng FIFA", showgrid=True, gridcolor="#e2e8f0")
     return apply_chart_layout(fig, height=360)
 
 
@@ -343,14 +360,14 @@ def _neutral_result_figure(df: pd.DataFrame):
         text="text_label",
         custom_data=["match_result", "count"],
         color_discrete_map={"Home Win": COLOR_HOME, "Away Win": COLOR_AWAY, "Draw": COLOR_DRAW},
-        labels={"neutral_label": "", "percentage": "Percentage", "match_result": "Result"},
-        title="Result by Neutral Location",
+        labels={"neutral_label": "", "percentage": "Tỷ lệ (%)", "match_result": "Kết quả"},
+        title="Lợi Thế Sân Nhà Biến Mất ở Sân Trung Lập — Tỷ Lệ Thắng Giảm Rõ Rệt",
     )
     fig.update_traces(
         textfont={"color": "white"},
         hovertemplate=(
-            "Location: %{x}<br>Result: %{customdata[0]}<br>"
-            "Percentage: %{y:.1f}%<br>Matches: %{customdata[1]}<extra></extra>"
+            "Địa điểm: %{x}<br>Kết quả: %{customdata[0]}<br>"
+            "Tỷ lệ: %{y:.1f}%<br>Số trận: %{customdata[1]}<extra></extra>"
         ),
     )
     for _, row in counts.groupby("neutral_label", as_index=False)["count"].sum().iterrows():
@@ -358,7 +375,7 @@ def _neutral_result_figure(df: pd.DataFrame):
             x=row["neutral_label"],
             y=100,
             yshift=12,
-            text=f"Total: {row['count']:,}",
+            text=f"Tổng: {row['count']:,} trận",
             showarrow=False,
             font={"size": 11, "color": COLORS["muted"]},
         )

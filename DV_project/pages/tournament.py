@@ -59,10 +59,10 @@ def _pos_group(pos):
 
 
 POS_COLORS = {
-    "Champion": COLORS["accent_2"],
-    "Top 4":    COLORS["accent"],
-    "Top 8":    COLORS["success"],
-    "Other":    COLORS["muted"],
+    "Champion": COLORS["accent_2"],   # amber
+    "Top 4":    COLORS["accent"],     # teal
+    "Top 8":    "#7c3aed",            # purple — CVD-safe (tránh đỏ-xanh lá)
+    "Other":    COLORS["muted"],      # grey
 }
 
 # Flag emoji + short label for chart axes
@@ -206,14 +206,14 @@ def layout() -> html.Div:
             html.Div(
                 className="chart-grid two-column",
                 children=[
-                    html.Div(className="chart-card", style={"minHeight": "360px"},
+                    html.Div(className="chart-card", style={"minHeight": "500px"},
                              children=dcc.Graph(id="tournament-goals-for-chart",
                                                 config={"displayModeBar": False, "responsive": True},
-                                                style={"height": "100%", "minHeight": "360px"})),
-                    html.Div(className="chart-card", style={"minHeight": "360px"},
+                                                style={"height": "100%", "minHeight": "500px"})),
+                    html.Div(className="chart-card", style={"minHeight": "500px"},
                              children=dcc.Graph(id="tournament-goals-against-chart",
                                                 config={"displayModeBar": False, "responsive": True},
-                                                style={"height": "100%", "minHeight": "360px"})),
+                                                style={"height": "100%", "minHeight": "500px"})),
                 ],
             ),
             # Scatter
@@ -318,43 +318,45 @@ def register_callbacks(app) -> None:
         gf_df = gf_df.dropna(subset=["Goals For"]).sort_values("Goals For", ascending=True)
         gf_df["Label"] = gf_df["Team"].map(_short)
         if gf_df.empty:
-            fig_gf = empty_figure(f"Goals Scored — {year}")
+            fig_gf = empty_figure(f"Sức tấn công {year}")
         else:
             fig_gf = px.bar(
                 gf_df, x="Goals For", y="Label", orientation="h",
                 color="position_group", color_discrete_map=POS_COLORS,
-                title=f"Goals Scored — {year}",
-                labels={"Goals For": "Goals", "Label": "", "position_group": "Group"},
+                title=f"Bàn ghi được — {year}",
+                labels={"Goals For": "Bàn ghi", "Label": "", "position_group": "Nhóm"},
                 custom_data=["Team"],
             )
-            apply_chart_layout(fig_gf, height=max(360, len(gf_df) * 22))
+            apply_chart_layout(fig_gf, height=max(400, len(gf_df) * 28))
             fig_gf.update_layout(
-                margin={"l": 60, "r": 24, "t": 48, "b": 10},
-                legend={"orientation": "h", "yanchor": "bottom", "y": -0.08, "xanchor": "left", "x": 0},
+                title_font_size=14,
+                margin={"l": 55, "r": 16, "t": 44, "b": 80},
+                legend={"orientation": "h", "yanchor": "top", "y": -0.09, "xanchor": "left", "x": 0, "font": {"size": 11}},
             )
-            fig_gf.update_traces(hovertemplate="%{customdata[0]}<br>Goals: %{x}<extra></extra>")
+            fig_gf.update_traces(hovertemplate="%{customdata[0]}<br>Bàn ghi: %{x}<extra></extra>")
 
         # ── Goals Against chart ───────────────────────────────────────────────
         ga_df = df_sorted[["Team", "Goals Against", "position_group"]].copy()
         ga_df["Goals Against"] = pd.to_numeric(ga_df["Goals Against"], errors="coerce")
-        ga_df = ga_df.dropna(subset=["Goals Against"]).sort_values("Goals Against", ascending=False)
+        ga_df = ga_df.dropna(subset=["Goals Against"]).sort_values("Goals Against", ascending=True)
         ga_df["Label"] = ga_df["Team"].map(_short)
         if ga_df.empty:
-            fig_ga = empty_figure(f"Goals Conceded — {year}")
+            fig_ga = empty_figure(f"Phòng ngự {year}")
         else:
             fig_ga = px.bar(
                 ga_df, x="Goals Against", y="Label", orientation="h",
                 color="position_group", color_discrete_map=POS_COLORS,
-                title=f"Goals Conceded — {year}",
-                labels={"Goals Against": "Conceded", "Label": "", "position_group": "Group"},
+                title=f"Bàn thủng lưới — {year}  (ít hơn = tốt hơn)",
+                labels={"Goals Against": "Bàn thủng", "Label": "", "position_group": "Nhóm"},
                 custom_data=["Team"],
             )
-            apply_chart_layout(fig_ga, height=max(360, len(ga_df) * 22))
+            apply_chart_layout(fig_ga, height=max(400, len(ga_df) * 28))
             fig_ga.update_layout(
-                margin={"l": 60, "r": 24, "t": 48, "b": 10},
-                legend={"orientation": "h", "yanchor": "bottom", "y": -0.08, "xanchor": "left", "x": 0},
+                title_font_size=14,
+                margin={"l": 55, "r": 16, "t": 44, "b": 80},
+                legend={"orientation": "h", "yanchor": "top", "y": -0.09, "xanchor": "left", "x": 0, "font": {"size": 11}},
             )
-            fig_ga.update_traces(hovertemplate="%{customdata[0]}<br>Conceded: %{x}<extra></extra>")
+            fig_ga.update_traces(hovertemplate="%{customdata[0]}<br>Bàn thủng: %{x}<extra></extra>")
 
         # ── Scatter ───────────────────────────────────────────────────────────
         sc_df = df_sorted[["Team", "Goals For", "Goals Against", "position_group", "Points", "Games Played"]].copy()
@@ -373,11 +375,22 @@ def register_callbacks(app) -> None:
                 sc_df, x="Goals For", y="Goals Against",
                 color="position_group", color_discrete_map=POS_COLORS,
                 text="DisplayLabel", size="Points", size_max=28,
-                title=f"Goals Scored vs Goals Conceded — {year}",
-                labels={"position_group": "Group"},
+                title=f"Tấn công vs Phòng ngự — {year}",
+                labels={"position_group": "Nhóm", "Goals For": "Bàn ghi", "Goals Against": "Bàn thủng"},
                 custom_data=["Team", "Points", "Games Played", "Label"],
             )
             apply_chart_layout(fig_sc, height=500)
+            # Diagonal reference line GF = GA
+            max_val = max(sc_df["Goals For"].max(), sc_df["Goals Against"].max()) + 1
+            fig_sc.add_shape(
+                type="line", x0=0, y0=0, x1=max_val, y1=max_val,
+                line={"dash": "dot", "color": COLORS["muted"], "width": 1.5},
+            )
+            fig_sc.add_annotation(
+                x=max_val * 0.6, y=max_val * 0.6,
+                text="GF = GA", showarrow=False,
+                font={"size": 10, "color": COLORS["muted"]}, textangle=-35,
+            )
             fig_sc.update_layout(
                 yaxis_autorange="reversed",
                 margin={"l": 48, "r": 48, "t": 56, "b": 48},
@@ -387,7 +400,7 @@ def register_callbacks(app) -> None:
                 textposition="top center",
                 textfont_size=10,
                 cliponaxis=False,
-                hovertemplate="<b>%{customdata[0]}</b> (%{customdata[3]})<br>GF: %{x}  GA: %{y}<br>Points: %{customdata[1]}<extra></extra>",
+                hovertemplate="<b>%{customdata[0]}</b> (%{customdata[3]})<br>Bàn ghi: %{x}  Bàn thủng: %{y}<br>Điểm: %{customdata[1]}<extra></extra>",
             )
 
         # ── Standings table ───────────────────────────────────────────────────

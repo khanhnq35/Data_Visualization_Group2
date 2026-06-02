@@ -301,6 +301,20 @@ body {
     border-color: var(--accent) !important;
 }
 
+.insight-card {
+    padding: 16px 20px;
+    background: var(--surface-alt);
+    border-left: 4px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--text);
+}
+
+.insight-card strong {
+    color: var(--accent-strong);
+}
+
 .empty-state {
     min-height: 280px;
     padding: 36px;
