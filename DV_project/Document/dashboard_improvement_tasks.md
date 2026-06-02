@@ -335,8 +335,8 @@ Cho Goals Against chart (dòng ~349):
 3. Nếu đổi, thêm annotation: `fig_ga.add_annotation(x=0, y=1.05, xref="paper", yref="paper", text="Ít hơn = phòng ngự tốt hơn", showarrow=False, font={"size":10, "color": COLORS["muted"]})`.
 
 Cho Scatter chart (dòng ~379):
-1. Tiêu đề hiện tại: `f"Tấn công vs Phòng ngự — {year}"` — đã tốt, ngắn gọn.
-2. Giữ nguyên.
+1. Tiêu đề hiện tại: `f"Bàn ghi vs Bàn thủng — {year}"` — đổi từ 'Tấn công vs Phòng ngự' theo yêu cầu người dùng.
+2. Cập nhật.
 
 **Tiêu chí chấp nhận:**
 - [x] Goals For: title có năm, ≤ 6 từ.

@@ -1,0 +1,2171 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FIFA World Cup Dashboard - Slide Trình Bày</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome for Premium Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            /* Palette theo yêu cầu */
+            --color-primary: #007c89;      /* Teal */
+            --color-primary-light: #00b4d8;
+            --color-primary-gradient: linear-gradient(135deg, #007c89, #00b4d8);
+            --color-accent: #d98324;       /* Amber */
+            --color-accent-gradient: linear-gradient(135deg, #d98324, #f39c12);
+            --color-secondary: #7c3aed;    /* Purple */
+            --color-secondary-gradient: linear-gradient(135deg, #7c3aed, #a855f7);
+            --color-danger: #ef4444;
+            --color-danger-gradient: linear-gradient(135deg, #ef4444, #f87171);
+            --color-success: #10b981;
+            --color-success-gradient: linear-gradient(135deg, #10b981, #34d399);
+            
+            --bg-dark: #0b1329;            /* Title & Dark background */
+            --bg-dark-gradient: linear-gradient(135deg, #090d1a, #111a33);
+            --bg-light: #f6f8fb;           /* Slide background */
+            --bg-card: #ffffff;
+            
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --text-light: #f8fafc;
+            
+            --font-title: 'Outfit', sans-serif;
+            --font-body: 'Plus Jakarta Sans', sans-serif;
+            
+            --transition-smooth: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            --transition-fast: all 0.2s ease;
+            
+            --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.03);
+            --shadow-card: 0 15px 35px rgba(0, 0, 0, 0.05);
+            --shadow-premium: 0 30px 60px rgba(0, 0, 0, 0.1);
+            
+            --border-radius-sm: 8px;
+            --border-radius-md: 16px;
+            --border-radius-lg: 24px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #050811;
+            color: var(--text-main);
+            font-family: var(--font-body);
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            user-select: none;
+        }
+
+        /* Slide Container & Scaler for 16:9 Aspect Ratio */
+        .presentation-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .slide-wrapper {
+            width: 1920px;
+            height: 1080px;
+            background-color: var(--bg-light);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(1);
+            transform-origin: center center;
+            overflow: hidden;
+            box-shadow: var(--shadow-premium);
+            border-radius: 12px;
+            transition: transform 0.1s ease;
+        }
+
+        /* Slide Styles */
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding: 60px 80px 80px 80px;
+            display: flex;
+            flex-direction: column;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateX(60px) scale(0.98);
+            transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), 
+                        transform 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+                        visibility 0.8s;
+            z-index: 1;
+            background-color: var(--bg-light);
+        }
+
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(0) scale(1);
+            z-index: 2;
+        }
+
+        .slide.prev {
+            transform: translateX(-60px) scale(0.98);
+        }
+
+        /* Header Slide Styles */
+        .slide-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 40px;
+            border-bottom: 2px solid rgba(0, 124, 137, 0.08);
+            padding-bottom: 20px;
+        }
+
+        .slide-header-left {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .slide-section-label {
+            font-family: var(--font-title);
+            font-size: 18px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--color-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .slide-section-label::before {
+            content: '';
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background-color: var(--color-accent);
+            border-radius: 50%;
+        }
+
+        .slide-title {
+            font-family: var(--font-title);
+            font-size: 42px;
+            font-weight: 800;
+            color: var(--text-main);
+            letter-spacing: -0.5px;
+        }
+
+        .slide-header-right {
+            font-family: var(--font-title);
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-muted);
+            background: rgba(0, 0, 0, 0.03);
+            padding: 6px 14px;
+            border-radius: 20px;
+        }
+
+        /* Content Area with custom premium scrollbar */
+        .slide-content {
+            flex-grow: 1;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            padding-right: 15px; /* space to prevent scrollbar overlapping content */
+        }
+
+        /* Custom Scrollbar for Slide Content (Premium design) */
+        .slide-content::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .slide-content::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.02);
+            border-radius: 4px;
+        }
+        
+        .slide-content::-webkit-scrollbar-thumb {
+            background: rgba(0, 124, 137, 0.2);
+            border-radius: 4px;
+            transition: var(--transition-fast);
+        }
+        
+        .slide-content::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 124, 137, 0.4);
+        }
+
+        /* Cascade Animations for Slide Elements */
+        .slide .fade-in-up {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), 
+                        transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .slide.active .fade-in-up {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .slide.active .delay-1 { transition-delay: 0.1s; }
+        .slide.active .delay-2 { transition-delay: 0.2s; }
+        .slide.active .delay-3 { transition-delay: 0.3s; }
+        .slide.active .delay-4 { transition-delay: 0.4s; }
+        .slide.active .delay-5 { transition-delay: 0.5s; }
+
+        /* Premium Card Component */
+        .card {
+            background: var(--bg-card);
+            border-radius: var(--border-radius-md);
+            padding: 30px;
+            box-shadow: var(--shadow-soft);
+            border: 1px solid rgba(0, 0, 0, 0.03);
+            position: relative;
+            overflow: hidden;
+            transition: var(--transition-smooth);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: transparent;
+            transition: var(--transition-smooth);
+        }
+
+        .card.accent-teal::before { background: var(--color-primary-gradient); }
+        .card.accent-amber::before { background: var(--color-accent-gradient); }
+        .card.accent-purple::before { background: var(--color-secondary-gradient); }
+        .card.accent-red::before { background: var(--color-danger-gradient); }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-card);
+            border-color: rgba(0, 124, 137, 0.15);
+        }
+
+        .card-title {
+            font-family: var(--font-title);
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-title i {
+            font-size: 20px;
+            color: var(--color-primary);
+        }
+
+        .card-body {
+            font-size: 18px;
+            line-height: 1.6;
+            color: var(--text-muted);
+        }
+
+        /* -------------------------------------------
+           LAYOUTS
+           ------------------------------------------- */
+        
+        /* 2 Column Layout */
+        .layout-grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            height: 100%;
+            align-items: stretch;
+        }
+
+        /* 3 Column Layout */
+        .layout-grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            height: 100%;
+        }
+
+        /* Screenshot + Panel Layout */
+        .layout-screenshot-panel {
+            display: grid;
+            grid-template-columns: 65% 35%;
+            gap: 40px;
+            height: 100%;
+            align-items: stretch;
+        }
+
+        .layout-screenshot-panel-reversed {
+            display: grid;
+            grid-template-columns: 35% 65%;
+            gap: 40px;
+            height: 100%;
+            align-items: stretch;
+        }
+
+        /* KPI Card Group */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .kpi-card {
+            background: var(--bg-card);
+            border-radius: var(--border-radius-md);
+            padding: 24px 30px;
+            box-shadow: var(--shadow-soft);
+            border: 1px solid rgba(0, 0, 0, 0.03);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            transition: var(--transition-smooth);
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-card);
+        }
+
+        .kpi-card .kpi-value {
+            font-family: var(--font-title);
+            font-size: 56px;
+            font-weight: 850;
+            line-height: 1;
+            margin-bottom: 8px;
+            background: var(--color-primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .kpi-card.accent-purple .kpi-value { background: var(--color-secondary-gradient); -webkit-background-clip: text; }
+        .kpi-card.accent-amber .kpi-value { background: var(--color-accent-gradient); -webkit-background-clip: text; }
+        .kpi-card.accent-red .kpi-value { background: var(--color-danger-gradient); -webkit-background-clip: text; }
+
+        .kpi-card .kpi-label {
+            font-family: var(--font-title);
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 4px;
+        }
+
+        .kpi-card .kpi-sub {
+            font-size: 15px;
+            color: var(--text-muted);
+        }
+
+        /* Horizontal Timeline */
+        .timeline-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 30px;
+            margin-top: 60px;
+            position: relative;
+        }
+
+        .timeline-container::after {
+            content: '';
+            position: absolute;
+            top: 100px;
+            left: 10%;
+            width: 80%;
+            height: 4px;
+            background: rgba(0, 124, 137, 0.08);
+            z-index: 1;
+        }
+
+        .timeline-step {
+            background: var(--bg-card);
+            border-radius: var(--border-radius-md);
+            padding: 30px;
+            box-shadow: var(--shadow-soft);
+            border: 1px solid rgba(0,0,0,0.03);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            z-index: 2;
+            transition: var(--transition-smooth);
+        }
+
+        .timeline-step:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-card);
+            border-color: rgba(0, 124, 137, 0.2);
+        }
+
+        .timeline-badge {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--color-primary-gradient);
+            color: white;
+            font-family: var(--font-title);
+            font-size: 28px;
+            font-weight: 800;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 20px rgba(0, 124, 137, 0.2);
+        }
+
+        .timeline-step.accent-purple .timeline-badge { background: var(--color-secondary-gradient); box-shadow: 0 10px 20px rgba(124, 58, 237, 0.2); }
+        .timeline-step.accent-amber .timeline-badge { background: var(--color-accent-gradient); box-shadow: 0 10px 20px rgba(217, 131, 36, 0.2); }
+        .timeline-step.accent-red .timeline-badge { background: var(--color-danger-gradient); box-shadow: 0 10px 20px rgba(239, 68, 68, 0.2); }
+
+        .timeline-step-title {
+            font-family: var(--font-title);
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 12px;
+        }
+
+        .timeline-step-desc {
+            font-size: 16px;
+            line-height: 1.6;
+            color: var(--text-muted);
+        }
+
+        /* -------------------------------------------
+           PREMIUM COMPONENTS
+           ------------------------------------------- */
+
+        /* Browser Mockup for screenshots */
+        .browser-mockup {
+            background: #ffffff;
+            border-radius: var(--border-radius-md);
+            box-shadow: var(--shadow-card);
+            overflow: hidden;
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            min-height: 400px; /* Ensures mockup is always well-sized */
+            transition: var(--transition-smooth);
+        }
+
+        .browser-mockup:hover {
+            box-shadow: var(--shadow-premium);
+            transform: translateY(-4px);
+        }
+
+        .browser-header {
+            background: #f1f5f9;
+            padding: 14px 24px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid rgba(0,0,0,0.06);
+        }
+
+        .browser-dots {
+            display: flex;
+            gap: 8px;
+            margin-right: 24px;
+        }
+
+        .browser-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .browser-dot.red { background: #ef4444; }
+        .browser-dot.yellow { background: #eab308; }
+        .browser-dot.green { background: #22c55e; }
+
+        .browser-address {
+            background: #ffffff;
+            border-radius: 20px;
+            flex-grow: 1;
+            font-size: 14px;
+            color: var(--text-muted);
+            padding: 4px 20px;
+            text-align: left;
+            border: 1px solid rgba(0,0,0,0.06);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: monospace;
+        }
+
+        .browser-content {
+            flex-grow: 1;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f8fafc;
+            padding: 10px;
+        }
+
+        .browser-content img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 4px;
+        }
+
+        /* Premium Table Style */
+        .premium-table-wrapper {
+            background: white;
+            border-radius: var(--border-radius-md);
+            overflow: hidden;
+            box-shadow: var(--shadow-soft);
+            border: 1px solid rgba(0,0,0,0.04);
+            height: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .premium-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 16px;
+        }
+
+        .premium-table th {
+            background: var(--color-primary);
+            color: white;
+            padding: 18px 24px;
+            font-family: var(--font-title);
+            font-weight: 600;
+            font-size: 18px;
+        }
+
+        .premium-table td {
+            padding: 18px 24px;
+            border-bottom: 1px solid #f1f5f9;
+            color: var(--text-main);
+        }
+
+        .premium-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .premium-table tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        .premium-table tr:hover td {
+            background-color: rgba(0, 124, 137, 0.03);
+        }
+
+        .table-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        
+        .table-badge.teal { background: rgba(0, 124, 137, 0.08); color: var(--color-primary); }
+        .table-badge.amber { background: rgba(217, 131, 36, 0.08); color: var(--color-accent); }
+        .table-badge.purple { background: rgba(124, 58, 237, 0.08); color: var(--color-secondary); }
+
+        /* List Items Cards */
+        .list-cards-vertical {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            height: 100%;
+            justify-content: space-between;
+        }
+
+        .list-cards-vertical .card {
+            padding: 22px 28px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        /* -------------------------------------------
+           SLIDE SPECIFIC STYLES
+           ------------------------------------------- */
+
+        /* SLIDE 1: HERO TITLE */
+        .slide-title-hero {
+            background: var(--bg-dark-gradient);
+            color: var(--text-light);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 0;
+            position: relative;
+        }
+
+        .slide-title-hero::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            background: radial-gradient(circle at center, rgba(0, 124, 137, 0.15) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .hero-container {
+            z-index: 2;
+            max-width: 1200px;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 40px;
+        }
+
+        .hero-badge {
+            background: rgba(0, 124, 137, 0.15);
+            border: 1px solid rgba(0, 124, 137, 0.3);
+            color: var(--color-primary-light);
+            padding: 8px 24px;
+            border-radius: 30px;
+            font-family: var(--font-title);
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        .hero-title {
+            font-family: var(--font-title);
+            font-size: 80px;
+            font-weight: 900;
+            line-height: 1.1;
+            letter-spacing: -2px;
+            background: linear-gradient(to right, #ffffff, #00b4d8, #7c3aed);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .hero-subtitle {
+            font-family: var(--font-title);
+            font-size: 38px;
+            font-weight: 600;
+            color: var(--color-accent);
+            letter-spacing: -0.5px;
+        }
+
+        .hero-divider {
+            width: 120px;
+            height: 4px;
+            background: var(--color-accent-gradient);
+            border-radius: 2px;
+            margin: 20px 0;
+        }
+
+        .hero-footer {
+            margin-top: 60px;
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            width: 100%;
+        }
+
+        .hero-footer-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 16px 32px;
+            border-radius: 16px;
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 18px;
+            color: #94a3b8;
+        }
+
+        .hero-footer-item i {
+            font-size: 22px;
+            color: var(--color-primary-light);
+        }
+
+        /* SLIDE 2: BÀI TOÁN PHÂN TÍCH */
+        .question-box-large {
+            background: linear-gradient(135deg, #007c89, #005f6b);
+            color: white;
+            border-radius: var(--border-radius-lg);
+            padding: 60px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            box-shadow: var(--shadow-premium);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .question-box-large::after {
+            content: '?';
+            position: absolute;
+            right: -20px;
+            bottom: -60px;
+            font-size: 300px;
+            font-weight: 900;
+            color: rgba(255, 255, 255, 0.05);
+            font-family: var(--font-title);
+            line-height: 1;
+        }
+
+        .question-box-label {
+            font-family: var(--font-title);
+            font-size: 18px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--color-accent);
+            margin-bottom: 24px;
+        }
+
+        .question-box-text {
+            font-family: var(--font-title);
+            font-size: 38px;
+            font-weight: 700;
+            line-height: 1.4;
+        }
+
+        /* SLIDE 5: DASHBOARD ARCHITECTURE */
+        .pipeline-vertical {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            height: 100%;
+            padding: 0 40px;
+        }
+
+        .pipeline-node {
+            width: 100%;
+            background: white;
+            border-radius: var(--border-radius-md);
+            padding: 24px;
+            text-align: center;
+            box-shadow: var(--shadow-soft);
+            border: 1px solid rgba(0,0,0,0.03);
+            font-family: var(--font-title);
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-main);
+            position: relative;
+            transition: var(--transition-smooth);
+        }
+
+        .pipeline-node:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-card);
+            border-color: rgba(0, 124, 137, 0.2);
+        }
+
+        .pipeline-node.active-node {
+            background: var(--color-primary-gradient);
+            color: white;
+        }
+
+        .pipeline-arrow {
+            color: var(--color-primary-light);
+            font-size: 24px;
+            animation: bounceVertical 2s infinite;
+        }
+
+        @keyframes bounceVertical {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(5px); }
+        }
+
+        .pages-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            height: 100%;
+            justify-content: center;
+        }
+
+        .page-menu-item {
+            background: white;
+            border-radius: var(--border-radius-md);
+            padding: 24px 30px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            box-shadow: var(--shadow-soft);
+            border: 1px solid rgba(0,0,0,0.03);
+            transition: var(--transition-smooth);
+        }
+
+        .page-menu-item:hover {
+            transform: translateX(10px);
+            border-color: rgba(124, 58, 237, 0.2);
+            box-shadow: var(--shadow-card);
+        }
+
+        .page-menu-num {
+            width: 50px;
+            height: 50px;
+            border-radius: var(--border-radius-sm);
+            background: rgba(124, 58, 237, 0.08);
+            color: var(--color-secondary);
+            font-family: var(--font-title);
+            font-size: 20px;
+            font-weight: 800;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .page-menu-name {
+            font-family: var(--font-title);
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        /* SLIDE 7: GRAPHIC DESIGN STYLES */
+        .layout-grid-2x2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 24px;
+            height: 100%;
+        }
+
+        .layout-grid-2x2 .card {
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        /* SLIDE 10: UPSET FOOTER */
+        .upset-footer-banner {
+            margin-top: 30px;
+            background: linear-gradient(90deg, #7c3aed, #d98324);
+            border-radius: var(--border-radius-md);
+            padding: 24px;
+            color: white;
+            text-align: center;
+            font-family: var(--font-title);
+            font-size: 24px;
+            font-weight: 700;
+            box-shadow: var(--shadow-card);
+        }
+
+        /* SLIDE 11: TOURNAMENT DETAIL SPECIFIC */
+        .detail-images-stacked {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .detail-images-stacked .browser-mockup {
+            height: calc(50% - 10px);
+            min-height: 240px;
+        }
+
+        .team-grid-2x2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 20px;
+            height: 100%;
+        }
+
+        .team-grid-2x2 .card {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .team-badge-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: #f1f5f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            margin-bottom: 12px;
+            color: var(--color-primary);
+        }
+
+        .card.accent-teal .team-badge-icon { color: var(--color-primary); background: rgba(0, 124, 137, 0.08); }
+        .card.accent-amber .team-badge-icon { color: var(--color-accent); background: rgba(217, 131, 36, 0.08); }
+        .card.accent-purple .team-badge-icon { color: var(--color-secondary); background: rgba(124, 58, 237, 0.08); }
+        .card.accent-red .team-badge-icon { color: var(--color-danger); background: rgba(239, 68, 68, 0.08); }
+
+        .team-name {
+            font-family: var(--font-title);
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 6px;
+        }
+
+        .team-desc {
+            font-size: 15px;
+            line-height: 1.5;
+            color: var(--text-muted);
+        }
+
+        /* SLIDE 12: TAKEAWAY LAYOUT */
+        .takeaway-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+            height: 70%;
+        }
+
+        .takeaway-grid .card {
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            justify-content: flex-start;
+        }
+
+        .takeaway-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: var(--border-radius-sm);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 28px;
+            margin-bottom: 24px;
+            color: white;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.05);
+        }
+
+        .card.accent-teal .takeaway-icon { background: var(--color-primary-gradient); }
+        .card.accent-purple .takeaway-icon { background: var(--color-secondary-gradient); }
+        .card.accent-amber .takeaway-icon { background: var(--color-accent-gradient); }
+        .card.accent-red .takeaway-icon { background: var(--color-danger-gradient); }
+
+        .takeaway-num {
+            font-family: var(--font-title);
+            font-size: 16px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+        }
+        
+        .card.accent-teal .takeaway-num { color: var(--color-primary-light); }
+        .card.accent-purple .takeaway-num { color: #a855f7; }
+        .card.accent-amber .takeaway-num { color: #f39c12; }
+        .card.accent-red .takeaway-num { color: #f87171; }
+
+        .takeaway-title {
+            font-family: var(--font-title);
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 16px;
+        }
+
+        .takeaway-desc {
+            font-size: 16px;
+            line-height: 1.6;
+            color: var(--text-muted);
+        }
+
+        .demo-transition-banner {
+            margin-top: auto;
+            background: linear-gradient(135deg, #007c89, #7c3aed);
+            border-radius: var(--border-radius-md);
+            padding: 24px 40px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow-card);
+        }
+
+        .demo-transition-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .demo-transition-left i {
+            font-size: 32px;
+            animation: pulseIcon 2s infinite;
+        }
+
+        @keyframes pulseIcon {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+
+        .demo-title-sub {
+            font-family: var(--font-title);
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--color-accent);
+        }
+
+        .demo-title-main {
+            font-family: var(--font-title);
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .demo-flow-steps {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-family: var(--font-title);
+            font-weight: 600;
+            font-size: 18px;
+        }
+
+        .demo-step-badge {
+            background: rgba(255, 255, 255, 0.12);
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .demo-flow-steps i {
+            font-size: 14px;
+            color: var(--color-accent);
+        }
+
+        /* -------------------------------------------
+           ON-SCREEN INTERACTIVE CONTROLS
+           ------------------------------------------- */
+
+        /* Navigation Controls Overlay */
+        .controls-overlay {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            pointer-events: auto;
+        }
+
+        .nav-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            color: var(--text-main);
+            font-size: 18px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            transition: var(--transition-fast);
+        }
+
+        .nav-btn:hover {
+            background: white;
+            color: var(--color-primary);
+            transform: scale(1.08);
+            box-shadow: 0 6px 20px rgba(0, 124, 137, 0.15);
+        }
+
+        .nav-btn:active {
+            transform: scale(0.96);
+        }
+
+        .slide-indicator {
+            font-family: var(--font-title);
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-muted);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 8px 20px;
+            border-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(0, 0, 0, 0.04);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .slide-indicator-current {
+            color: var(--color-primary);
+            font-weight: 850;
+        }
+
+        /* Left Action Controls (Bottom Left Group) */
+        .left-controls-group {
+            position: absolute;
+            bottom: 30px;
+            left: 40px;
+            z-index: 100;
+            display: flex;
+            gap: 16px;
+            pointer-events: auto;
+        }
+
+        .action-btn {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            color: var(--text-main);
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-family: var(--font-title);
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition-fast);
+        }
+
+        .action-btn:hover {
+            background: white;
+            color: var(--color-primary);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 124, 137, 0.15);
+        }
+
+        .action-btn.active {
+            background: var(--color-primary);
+            color: white;
+            border-color: var(--color-primary);
+        }
+
+        .action-btn.btn-secondary:hover {
+            color: var(--color-secondary);
+            box-shadow: 0 6px 20px rgba(124, 58, 237, 0.15);
+        }
+
+        .action-btn.btn-secondary.active {
+            background: var(--color-secondary);
+            color: white;
+            border-color: var(--color-secondary);
+        }
+
+        /* Top Progress Bar */
+        .progress-bar-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            z-index: 100;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            width: 8.33%; /* 1/12 */
+            background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+            transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* Speaker Notes Drawer */
+        .speaker-notes-drawer {
+            position: absolute;
+            bottom: -250px;
+            left: 0;
+            width: 100%;
+            height: 200px;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(12px);
+            z-index: 99;
+            box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.25);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            transition: bottom 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            color: #e2e8f0;
+            padding: 24px 80px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .speaker-notes-drawer.open {
+            bottom: 0;
+        }
+
+        .notes-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 8px;
+        }
+
+        .notes-title {
+            font-family: var(--font-title);
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--color-accent);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .notes-close {
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .notes-content {
+            font-size: 17px;
+            line-height: 1.6;
+            overflow-y: auto;
+            max-height: 120px;
+            color: #cbd5e1;
+        }
+        
+        .notes-content strong {
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="presentation-container">
+        
+        <!-- Top Progress Bar -->
+        <div class="progress-bar-container">
+            <div class="progress-bar-fill" id="progressBar"></div>
+        </div>
+
+        <!-- Slide Wrapper (16:9 Scale Box) -->
+        <div class="slide-wrapper" id="slideWrapper">
+            
+            <!-- ==========================================
+                 SLIDE 1: TITLE HERO (DARK MODE)
+                 ========================================== -->
+            <div class="slide slide-title-hero active" data-slide="1">
+                <div class="hero-container">
+                    <div class="hero-badge fade-in-up delay-1">Dashboard Trực Quan Hóa</div>
+                    <h1 class="hero-title fade-in-up delay-2">FIFA WORLD CUP DASHBOARD</h1>
+                    <div class="hero-subtitle fade-in-up delay-3">Tăng trưởng, Thống trị và Bất ngờ</div>
+                    <div class="hero-divider fade-in-up delay-3"></div>
+                    
+                    <div class="hero-footer fade-in-up delay-4">
+                        <div class="hero-footer-item">
+                            <i class="fa-solid fa-code"></i>
+                            <span>Dash + Plotly + Pandas</span>
+                        </div>
+                        <div class="hero-footer-item">
+                            <i class="fa-solid fa-users"></i>
+                            <span>Nhóm 2 (Đức, Đường, Khánh)</span>
+                        </div>
+                        <div class="hero-footer-item">
+                            <i class="fa-solid fa-chart-line"></i>
+                            <span>Môn học: Data Visualization</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==========================================
+                 SLIDE 2: BÀI TOÁN PHÂN TÍCH
+                 ========================================== -->
+            <div class="slide" data-slide="2">
+                <div class="slide-header">
+                    <div class="slide-header-left">
+                        <div class="slide-section-label">Giới thiệu</div>
+                        <h2 class="slide-title">World Cup có thật sự toàn cầu hơn?</h2>
+                    </div>
+                    <div class="slide-header-right">Slide 02 / 12</div>
+                </div>
+                <div class="slide-content">
+                    <div class="layout-grid-2">
+                        <div class="question-box-large fade-in-up delay-1">
+                            <div class="question-box-label">Câu hỏi phân tích chính</div>
+                            <div class="question-box-text">
+                                World Cup đã thật sự trở thành một giải đấu toàn cầu, hay chức vô địch vẫn nằm trong tay một nhóm đội tuyển elite?
+                            </div>
+                        </div>
+                        
+                        <div class="list-cards-vertical">
+                            <div class="card accent-teal fade-in-up delay-2">
+                                <div class="card-title"><i class="fa-solid fa-expand"></i> 1. Quy mô giải đấu</div>
+                                <div class="card-body">
+                                    Quy mô giải đấu mở rộng và tăng trưởng qua các thời kỳ như thế nào về số đội, số trận và bàn thắng?
+                                </div>
+                            </div>
+                            <div class="card accent-purple fade-in-up delay-3">
+                                <div class="card-title"><i class="fa-solid fa-trophy"></i> 2. Sự phân tán vô địch</div>
+                                <div class="card-body">
+                                    Chức vô địch có phân tán hơn không qua thời gian, hay quyền lực vẫn tập trung vào nhóm ông lớn?
+                                </div>
+                            </div>
+                            <div class="card accent-amber fade-in-up delay-4">
+                                <div class="card-title"><i class="fa-solid fa-circle-question"></i> 3. Tính khó đoán</div>
+                                <div class="card-body">
+                                    Ở cấp độ từng trận, bảng xếp hạng FIFA có phản ánh chính xác kết quả thực tế và có bao nhiêu bất ngờ xảy ra?
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==========================================
+                 SLIDE 3: DATASET OVERVIEW
+                 ========================================== -->
+            <div class="slide" data-slide="3">
+                <div class="slide-header">
+                    <div class="slide-header-left">
+                        <div class="slide-section-label">Dữ liệu</div>
+                        <h2 class="slide-title">Dữ liệu sử dụng phân tích</h2>
+                    </div>
+                    <div class="slide-header-right">Slide 03 / 12</div>
+                </div>
+                <div class="slide-content">
+                    <!-- Top 4 KPI cards -->
+                    <div class="kpi-grid fade-in-up delay-1">
+                        <div class="kpi-card">
+                            <div class="kpi-value">22</div>
+                            <div class="kpi-label">Kỳ World Cup</div>
+                            <div class="kpi-sub">Lịch sử từ 1930 – 2022</div>
+                        </div>
+                        <div class="kpi-card accent-purple">
+                            <div class="kpi-value">23,921</div>
+                            <div class="kpi-label">Trận đấu quốc tế</div>
+                            <div class="kpi-sub">Giai đoạn từ 1993 – 2022</div>
+                        </div>
+                        <div class="kpi-card accent-amber">
+                            <div class="kpi-value">9</div>
+                            <div class="kpi-label">Đội tuyển vô địch</div>
+                            <div class="kpi-sub">Trong lịch sử giải đấu</div>
+                        </div>
+                        <div class="kpi-card accent-red">
+                            <div class="kpi-value">5</div>
+                            <div class="kpi-label">Cup vô địch</div>
+                            <div class="kpi-sub">Kỷ lục thuộc về Brazil</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Table Nguồn dữ liệu -->
+                    <div class="premium-table-wrapper fade-in-up delay-2">
+                        <table class="premium-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 30%">Nguồn dữ liệu (.csv)</th>
+                                    <th style="width: 40%">Nội dung chính</th>
+                                    <th style="width: 30%">Vai trò trong dashboard</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>FIFA - World Cup Summary.csv</strong></td>
+                                    <td>Năm tổ chức, nước chủ nhà, đội vô địch, số đội tham dự, số trận, số bàn thắng.</td>
+                                    <td><span class="table-badge teal">Phân tích xu hướng dài hạn</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>FIFA - {year}.csv</strong></td>
+                                    <td>Thành tích chi tiết (vị trí, số trận, bàn thắng, điểm số) của từng đội tuyển trong kỳ cụ thể.</td>
+                                    <td><span class="table-badge purple">Phân tích standings từng kỳ</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>international_matches.csv</strong></td>
+                                    <td>Kết quả trận đấu, bảng xếp hạng FIFA của 2 đội, tỷ số, tính chất địa điểm trung lập.</td>
+                                    <td><span class="table-badge amber">Phân tích competitiveness & upset</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==========================================
+                 SLIDE 4: STORYTELLING FLOW
+                 ========================================== -->
+            <div class="slide" data-slide="4">
+                <div class="slide-header">
+                    <div class="slide-header-left">
+                        <div class="slide-section-label">Câu chuyện dữ liệu</div>
+                        <h2 class="slide-title">Mạch kể chuyện của dashboard (Storytelling)</h2>
+                    </div>
+                    <div class="slide-header-right">Slide 04 / 12</div>
+                </div>
+                <div class="slide-content">
+                    <div class="timeline-container fade-in-up delay-1">
+                        <!-- Step 1 -->
+                        <div class="timeline-step">
+                            <div class="timeline-badge">01</div>
+                            <div class="timeline-step-title">1. Expansion</div>
+                            <div class="timeline-step-desc">
+                                Quy mô World Cup ngày càng mở rộng rõ rệt về số lượng đội tuyển tham gia, số trận đấu và quy mô tổ chức toàn cầu.
+                            </div>
+                        </div>
+                        <!-- Step 2 -->
+                        <div class="timeline-step accent-purple">
+                            <div class="timeline-badge">02</div>
+                            <div class="timeline-step-title">2. Dominance</div>
+                            <div class="timeline-step-desc">
+                                Lớn hơn không đồng nghĩa với cân bằng: Chức vô địch và Top 4 vẫn tập trung cao độ vào một nhóm nhỏ đội tuyển elite.
+                            </div>
+                        </div>
+                        <!-- Step 3 -->
+                        <div class="timeline-step accent-amber">
+                            <div class="timeline-badge">03</div>
+                            <div class="timeline-step-title">3. Upsets</div>
+                            <div class="timeline-step-desc">
+                                Ở cấp độ từng trận đấu, bóng đá luôn chứa đựng bất ngờ. FIFA Ranking cao không bảo chứng hoàn toàn cho chiến thắng.
+                            </div>
+                        </div>
+                        <!-- Step 4 -->
+                        <div class="timeline-step accent-red">
+                            <div class="timeline-badge">04</div>
+                            <div class="timeline-step-title">4. 2022 Case Study</div>
+                            <div class="timeline-step-desc">
+                                Đi sâu vào World Cup 2022 để minh họa sự kết hợp hoàn hảo giữa các "ông lớn" truyền thống và những "ngựa ô" đầy bất ngờ.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==========================================
+                 SLIDE 5: CẤU TRÚC DASHBOARD
+                 ========================================== -->
+            <div class="slide" data-slide="5">
+                <div class="slide-header">
+                    <div class="slide-header-left">
+                        <div class="slide-section-label">Kiến trúc</div>
+                        <h2 class="slide-title">Cấu trúc xây dựng Dashboard</h2>
+                    </div>
+                    <div class="slide-header-right">Slide 05 / 12</div>
+                </div>
+                <div class="slide-content">
+                    <div class="layout-grid-2">
+                        <!-- Pipeline -->
+                        <div class="pipeline-vertical fade-in-up delay-1">
+                            <div class="pipeline-node">
+                                <i class="fa-solid fa-file-csv" style="color: #10b981; margin-right: 10px;"></i> Dữ liệu nguồn CSV
+                            </div>
+                            <div class="pipeline-arrow"><i class="fa-solid fa-arrow-down"></i></div>
+                            <div class="pipeline-node">
+                                <i class="fa-solid fa-gears" style="color: #007c89; margin-right: 10px;"></i> Pandas (Xử lý dữ liệu)
+                            </div>
+                            <div class="pipeline-arrow"><i class="fa-solid fa-arrow-down"></i></div>
+                            <div class="pipeline-node">
+                                <i class="fa-solid fa-chart-pie" style="color: #d98324; margin-right: 10px;"></i> Plotly Charts (Biểu đồ tương tác)
+                            </div>
+                            <div class="pipeline-arrow"><i class="fa-solid fa-arrow-down"></i></div>
+                            <div class="pipeline-node active-node">
+                                <i class="fa-solid fa-layer-group" style="margin-right: 10px;"></i> Dash Multi-page App (Ứng dụng)
+                            </div>
+                        </div>
+                        
+                        <!-- Pages List -->
+                        <div class="pages-menu fade-in-up delay-2">
+                            <h3 class="card-title" style="margin-left: 20px; margin-bottom: 10px;">
+                                <i class="fa-solid fa-folder-tree" style="color: var(--color-secondary);"></i> Các trang phân tích chính
+                            </h3>
+                            <div class="page-menu-item">
+                                <div class="page-menu-num">01</div>
+                                <div class="page-menu-name">Overview (Tổng quan tăng trưởng)</div>
+                            </div>
+                            <div class="page-menu-item">
+                                <div class="page-menu-num">02</div>
+                                <div class="page-menu-name">Dominance (Sự thống trị của các khu vực)</div>
+                            </div>
+                            <div class="page-menu-item">
+                                <div class="page-menu-num">03</div>
+                                <div class="page-menu-name">Upsets & Competitiveness (Những trận bất ngờ)</div>
+                            </div>
+                            <div class="page-menu-item">
+                                <div class="page-menu-num">04</div>
+                                <div class="page-menu-name">Tournament Detail (Chi tiết từng giải đấu)</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==========================================
+                 SLIDE 6: OVERVIEW PAGE
+                 ========================================== -->
+            <div class="slide" data-slide="6">
+                <div class="slide-header">
+                    <div class="slide-header-left">
+                        <div class="slide-section-label">Mạch truyện 1: Expansion</div>
+                        <h2 class="slide-title">Overview: Quy mô mở rộng theo thời gian</h2>
+                    </div>
+                    <div class="slide-header-right">Slide 06 / 12</div>
+                </div>
+                <div class="slide-content">
+                    <div class="layout-screenshot-panel">
+                        <!-- Screenshot -->
+                        <div class="browser-mockup fade-in-up delay-1">
+                            <div class="browser-header">
+                                <div class="browser-dots">
+                                    <div class="browser-dot red"></div>
+                                    <div class="browser-dot yellow"></div>
+                                    <div class="browser-dot green"></div>
+                                </div>
+                                <div class="browser-address">
+                                    <i class="fa-solid fa-lock" style="color: #10b981;"></i> localhost:8050/overview
+                                </div>
+                            </div>
+                            <div class="browser-content">
+                                <img src="dashboard_image/overview_1.png" alt="Overview Page Screenshot">
+                            </div>
+                        </div>
+                        
+                        <!-- Insight cards -->
+                        <div class="list-cards-vertical fade-in-up delay-2">
+                            <div class="card accent-teal">
+                                <div class="card-title"><i class="fa-solid fa-users-viewfinder"></i> Số đội tham gia tăng mạnh</div>
+                                <div class="card-body">
+                                    Giải đấu ban đầu chỉ có 13 đội (1930), tăng lên 16 đội, rồi 24 đội và duy trì 32 đội ở thời đại hiện nay, thể hiện rõ xu hướng toàn cầu hóa giải đấu.
+                                </div>
+                            </div>
+                            <div class="card accent-purple">
+                                <div class="card-title"><i class="fa-solid fa-futbol"></i> Trận đấu & bàn thắng bùng nổ</div>
+                                <div class="card-body">
+                                    Việc mở rộng quy mô kéo theo số lượng trận đấu tăng cao, tổng số bàn thắng ghi được trong mỗi kỳ World Cup cũng có xu hướng đi lên rõ rệt.
+                                </div>
+                            </div>
+                            <div class="card accent-amber">
+                                <div class="card-title"><i class="fa-solid fa-chart-line"></i> Hiệu suất bàn thắng dao động</div>
+                                <div class="card-body">
+                                    Tỷ lệ bàn thắng trung bình mỗi trận đạt cực đại ở thời kỳ sơ khai (trên 5 bàn/trận ở thập niên 50) trước khi giảm xuống và đi ngang quanh mốc 2.5 - 3 bàn/trận ở bóng đá hiện đại.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==========================================
+                 SLIDE 7: THIẾT KẾ VISUALIZATION OVERVIEW
+                 ========================================== -->
+            <div class="slide" data-slide="7">
+                <div class="slide-header">
+                    <div class="slide-header-left">
+                        <div class="slide-section-label">Thiết kế Visualization</div>
+                        <h2 class="slide-title">Kỹ thuật trực quan xu hướng dài hạn</h2>
+                    </div>
+                    <div class="slide-header-right">Slide 07 / 12</div>
+                </div>
+                <div class="slide-content">
+                    <div class="layout-screenshot-panel">
+                        <!-- Chart Crop -->
+                        <div class="browser-mockup fade-in-up delay-1">
+                            <div class="browser-header">
+                                <div class="browser-dots">
+                                    <div class="browser-dot red"></div>
+                                    <div class="browser-dot yellow"></div>
+                                    <div class="browser-dot green"></div>
+                                </div>
+                                <div class="browser-address">localhost:8050/overview (crop)</div>
+                            </div>
+                            <div class="browser-content">
+                                <img src="dashboard_image/overview_2.png" alt="Overview Goals Chart">
+                            </div>
+                        </div>
+                        
+                        <!-- Design breakdown 2x2 grid -->
+                        <div class="layout-grid-2x2 fade-in-up delay-2">
+                            <div class="card accent-teal">
+                                <div class="card-title" style="font-size: 20px;"><i class="fa-solid fa-chart-line"></i> 1. Line Chart</div>
+                                <div class="card-body" style="font-size: 15px;">
+                                    Là lựa chọn tối ưu để theo dõi và so sánh sự thay đổi của nhiều chỉ số (đội, trận, bàn thắng) theo dòng chảy thời gian lịch sử.
+                                </div>
+                            </div>
+                            <div class="card accent-purple">
+                                <div class="card-title" style="font-size: 20px;"><i class="fa-solid fa-location-dot"></i> 2. Point Markers</div>
+                                <div class="card-body" style="font-size: 15px;">
+                                    Vì World Cup diễn ra định kỳ 4 năm một lần, các markers giúp biểu thị chính xác các mốc tổ chức thực tế, tránh hiểu lầm là dữ liệu liên tục hàng năm.
+                                </div>
+                            </div>
+                            <div class="card accent-amber">
+                                <div class="card-title" style="font-size: 20px;"><i class="fa-solid fa-note-sticky"></i> 3. Annotations</div>
+                                <div class="card-body" style="font-size: 15px;">
+                                    Hiển thị các ghi chú quan trọng ngay trên biểu đồ (năm hoãn giải, năm chuyển dịch quy mô) giúp người dùng nắm bắt bối cảnh lịch sử lập tức.
+                                </div>
+                            </div>
+                            <div class="card accent-red">
+                                <div class="card-title" style="font-size: 20px;"><i class="fa-solid fa-minus"></i> 4. Reference Lines</div>
+                                <div class="card-body" style="font-size: 15px;">
+                                    Đường trung bình (Average Line) giúp người xem có ngay một hệ tham chiếu để so sánh xem kỳ World Cup nào có hiệu suất bàn thắng cao/thấp hơn lịch sử.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==========================================
+                 SLIDE 8: DOMINANCE PAGE
+                 ========================================== -->
+            <div class="slide" data-slide="8">
+                <div class="slide-header">
+                    <div class="slide-header-left">
+                        <div class="slide-section-label">Mạch truyện 2: Dominance</div>
+                        <h2 class="slide-title">Dominance: Quyền lực vẫn rất tập trung</h2>
+                    </div>
+                    <div class="slide-header-right">Slide 08 / 12</div>
+                </div>
+                <div class="slide-content">
+                    <div class="layout-screenshot-panel">
+                        <!-- Screenshot -->
+                        <div class="browser-mockup fade-in-up delay-1">
+                            <div class="browser-header">
+                                <div class="browser-dots">
+                                    <div class="browser-dot red"></div>
+                                    <div class="browser-dot yellow"></div>
+                                    <div class="browser-dot green"></div>
+                                </div>
+                                <div class="browser-address">
+                                    <i class="fa-solid fa-lock" style="color: #10b981;"></i> localhost:8050/dominance
+                                </div>
+                            </div>
+                            <div class="browser-content">
+                                <img src="dashboard_image/dominance_1.png" alt="Dominance Page Screenshot">
+                            </div>
+                        </div>
+                        
+                        <!-- Insights -->
+                        <div class="list-cards-vertical fade-in-up delay-2">
+                            <div class="card accent-teal">
+                                <div class="card-title"><i class="fa-solid fa-trophy"></i> CLB nhà giàu: Chỉ 9 nhà vô địch</div>
+                                <div class="card-body">
+                                    Dù có hàng trăm nước tham dự vòng loại và giải đấu mở rộng quy mô lớn, qua 22 kỳ World Cup chỉ có vỏn vẹn 9 đội tuyển từng bước lên bục cao nhất.
+                                </div>
+                            </div>
+                            <div class="card accent-purple">
+                                <div class="card-title"><i class="fa-solid fa-earth-americas"></i> Châu Âu & Nam Mỹ độc tôn</div>
+                                <div class="card-body">
+                                    Sự phân hóa địa lý cực kỳ rõ nét: Toàn bộ cúp vô địch và phần lớn các vị trí trong Top 4 trong lịch sử đều thuộc về 2 khu vực bóng đá mạnh nhất này.
+                                </div>
+                            </div>
+                            <div class="card accent-amber">
+                                <div class="card-title"><i class="fa-solid fa-crown"></i> Kỷ lục gia Brazil</div>
+                                <div class="card-body">
+                                    Brazil nổi bật hơn cả với kỷ lục 5 lần vô địch, là quốc gia duy nhất tham dự đủ 22 kỳ và sở hữu các chỉ số tích lũy (bàn thắng, điểm số) vượt trội.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==========================================
+                 SLIDE 9: THIẾT KẾ VISUALIZATION DOMINANCE
+                 ========================================== -->
+            <div class="slide" data-slide="9">
+                <div class="slide-header">
+                    <div class="slide-header-left">
+                        <div class="slide-section-label">Thiết kế Visualization</div>
+                        <h2 class="slide-title">So sánh thành tích & Phân phối địa lý</h2>
+                    </div>
+                    <div class="slide-header-right">Slide 09 / 12</div>
+                </div>
+                <div class="slide-content">
+                    <div class="layout-grid-3">
+                        <!-- Horizontal Bar Chart -->
+                        <div class="card accent-teal fade-in-up delay-1" style="display: flex; flex-direction: column;">
+                            <div class="card-title"><i class="fa-solid fa-chart-bar"></i> Horizontal Bar Chart</div>
+                            <div class="card-body" style="flex-grow: 1;">
+                                <p style="margin-bottom: 20px;">Dùng để biểu thị số lần vô địch của các đội tuyển.</p>
+                                <strong style="color: var(--text-main);">Ưu điểm:</strong>
+                                <ul style="margin-left: 20px; margin-top: 10px; display: flex; flex-direction: column; gap: 10px;">
+                                    <li>Độ dài các thanh giúp người xem lập tức nhận diện được thứ tự xếp hạng (Brazil, Đức, Ý...).</li>
+                                    <li>Tránh quá tải thị giác so với biểu đồ tròn (Pie chart) khi có nhiều nhóm dữ liệu nhỏ.</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <!-- Stacked Bar Chart -->
+                        <div class="card accent-purple fade-in-up delay-2" style="display: flex; flex-direction: column;">
+                            <div class="card-title"><i class="fa-solid fa-chart-column"></i> Stacked Bar Chart</div>
+                            <div class="card-body" style="flex-grow: 1;">
+                                <p style="margin-bottom: 20px;">Biểu diễn tỷ lệ phân bổ của các khu vực trong Top 4.</p>
+                                <strong style="color: var(--text-main);">Ưu điểm:</strong>
+                                <ul style="margin-left: 20px; margin-top: 10px; display: flex; flex-direction: column; gap: 10px;">
+                                    <li>Trực quan hóa sự so sánh cơ cấu châu lục (UEFA vs CONMEBOL) trong nhóm dẫn đầu.</li>
+                                    <li>Chứng minh sinh động luận điểm: "Khu vực khác gần như chưa thể chen chân vào top đầu".</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <!-- Detailed Standings Table -->
+                        <div class="card accent-amber fade-in-up delay-3" style="display: flex; flex-direction: column;">
+                            <div class="card-title"><i class="fa-solid fa-table-list"></i> Ranked Table</div>
+                            <div class="card-body" style="flex-grow: 1;">
+                                <p style="margin-bottom: 20px;">Cung cấp số liệu thống kê tích lũy chi tiết dạng bảng.</p>
+                                <strong style="color: var(--text-main);">Ưu điểm:</strong>
+                                <ul style="margin-left: 20px; margin-top: 10px; display: flex; flex-direction: column; gap: 10px;">
+                                    <li>Cho phép tra cứu chính xác số lần tham gia, vị trí tốt nhất, tổng số bàn thắng, điểm số.</li>
+                                    <li>Bổ trợ hoàn hảo cho biểu đồ trực quan bằng cách hiển thị các chỉ số thứ cấp khi cần đối chiếu sâu.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==========================================
+                 SLIDE 10: UPSETS PAGE
+                 ========================================== -->
+            <div class="slide" data-slide="10">
+                <div class="slide-header">
+                    <div class="slide-header-left">
+                        <div class="slide-section-label">Mạch truyện 3: Upsets</div>
+                        <h2 class="slide-title">Upsets: Bảng xếp hạng không quyết định tất cả</h2>
+                    </div>
+                    <div class="slide-header-right">Slide 10 / 12</div>
+                </div>
+                <div class="slide-content">
+                    <div class="layout-screenshot-panel">
+                        <!-- Screenshot -->
+                        <div class="browser-mockup fade-in-up delay-1">
+                            <div class="browser-header">
+                                <div class="browser-dots">
+                                    <div class="browser-dot red"></div>
+                                    <div class="browser-dot yellow"></div>
+                                    <div class="browser-dot green"></div>
+                                </div>
+                                <div class="browser-address">
+                                    <i class="fa-solid fa-lock" style="color: #10b981;"></i> localhost:8050/upsets
+                                </div>
+                            </div>
+                            <div class="browser-content">
+                                <img src="dashboard_image/upsets_1.png" alt="Upsets Page Screenshot">
+                            </div>
+                        </div>
+                        
+                        <!-- Analysis Panels -->
+                        <div class="list-cards-vertical fade-in-up delay-2">
+                            <div class="card accent-purple">
+                                <div class="card-title"><i class="fa-solid fa-chart-line"></i> Rank Gap vs Goal Difference</div>
+                                <div class="card-body">
+                                    Biểu đồ phân tán (Scatter Plot) phân tích mối quan hệ giữa chênh lệch thứ hạng FIFA và khoảng cách bàn thắng thực tế của từng cặp trận đấu quốc tế.
+                                </div>
+                            </div>
+                            <div class="card accent-amber">
+                                <div class="card-title"><i class="fa-solid fa-bolt"></i> Định nghĩa "Upset" (Bất ngờ)</div>
+                                <div class="card-body">
+                                    Các trận đấu mà đội cửa dưới (thứ hạng kém hơn đáng kể) giành chiến thắng trước đội cửa trên được tô màu nổi bật trên biểu đồ để dễ dàng định vị.
+                                </div>
+                            </div>
+                            <div class="card accent-teal">
+                                <div class="card-title"><i class="fa-solid fa-hand-pointer"></i> Tương tác Click Data</div>
+                                <div class="card-body">
+                                    Người dùng có thể nhấp trực tiếp vào bất kỳ điểm dữ liệu nào trên scatter plot để hiển thị thông tin chi tiết của trận đấu bất ngờ đó ở bảng thông tin bên cạnh.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Footer Banner -->
+                    <div class="upset-footer-banner fade-in-up delay-3">
+                        <i class="fa-solid fa-triangle-exclamation" style="margin-right: 12px; color: #f39c12;"></i>
+                        Dù cúp vô địch bị thống trị bởi nhóm elite, ở từng trận đấu cụ thể, bất ngờ (upset) luôn có thể xảy ra!
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==========================================
+                 SLIDE 11: TOURNAMENT DETAIL 2022
+                 ========================================== -->
+            <div class="slide" data-slide="11">
+                <div class="slide-header">
+                    <div class="slide-header-left">
+                        <div class="slide-section-label">Mạch truyện 4: Case Study</div>
+                        <h2 class="slide-title">World Cup 2022: Bức tranh toàn cảnh thu nhỏ</h2>
+                    </div>
+                    <div class="slide-header-right">Slide 11 / 12</div>
+                </div>
+                <div class="slide-content">
+                    <div class="layout-screenshot-panel">
+                        <!-- Stacked Screenshots -->
+                        <div class="detail-images-stacked fade-in-up delay-1">
+                            <div class="browser-mockup">
+                                <div class="browser-header" style="padding: 8px 16px;">
+                                    <div class="browser-dots"><div class="browser-dot red"></div><div class="browser-dot yellow"></div><div class="browser-dot green"></div></div>
+                                    <div class="browser-address" style="padding: 2px 10px; font-size: 11px;">localhost:8050/detail (standing)</div>
+                                </div>
+                                <div class="browser-content" style="padding: 4px;">
+                                    <img src="dashboard_image/detail_1.png" alt="Detail 1">
+                                </div>
+                            </div>
+                            
+                            <div class="browser-mockup">
+                                <div class="browser-header" style="padding: 8px 16px;">
+                                    <div class="browser-dots"><div class="browser-dot red"></div><div class="browser-dot yellow"></div><div class="browser-dot green"></div></div>
+                                    <div class="browser-address" style="padding: 2px 10px; font-size: 11px;">localhost:8050/detail (attack_defense)</div>
+                                </div>
+                                <div class="browser-content" style="padding: 4px;">
+                                    <img src="dashboard_image/detail_2.png" alt="Detail 2">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 4 Team Cards Grid -->
+                        <div class="team-grid-2x2 fade-in-up delay-2">
+                            <div class="card accent-teal">
+                                <div class="team-badge-icon"><i class="fa-solid fa-crown"></i></div>
+                                <div class="team-name">Argentina</div>
+                                <div class="team-desc">Nhà vô địch kịch tính, đại diện xuất sắc cho nhóm đội tuyển elite (CONMEBOL) khẳng định vị thế.</div>
+                            </div>
+                            <div class="card accent-red">
+                                <div class="team-badge-icon"><i class="fa-solid fa-fire"></i></div>
+                                <div class="team-name">France</div>
+                                <div class="team-desc">Á quân giải đấu, khẳng định sức mạnh tấn công hủy diệt được thể hiện rõ trên biểu đồ GF vs GA.</div>
+                            </div>
+                            <div class="card accent-purple">
+                                <div class="team-badge-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                                <div class="team-name">Croatia</div>
+                                <div class="team-desc">Đội giành hạng ba, tiếp tục duy trì sự lỳ lợm đáng kinh ngạc ở nhóm đầu qua các kỳ liên tiếp.</div>
+                            </div>
+                            <div class="card accent-amber">
+                                <div class="team-badge-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+                                <div class="team-name">Morocco</div>
+                                <div class="team-desc">Hiện tượng lịch sử khi lọt vào Top 4, đại diện phi thường cho các đội tuyển "outsider" trỗi dậy.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==========================================
+                 SLIDE 12: TAKEAWAYS & DEMO
+                 ========================================== -->
+            <div class="slide" data-slide="12">
+                <div class="slide-header">
+                    <div class="slide-header-left">
+                        <div class="slide-section-label">Tổng kết</div>
+                        <h2 class="slide-title">Key Takeaways & Trải nghiệm thực tế</h2>
+                    </div>
+                    <div class="slide-header-right">Slide 12 / 12</div>
+                </div>
+                <div class="slide-content">
+                    <div class="takeaway-grid fade-in-up delay-1">
+                        <!-- Card 1 -->
+                        <div class="card accent-teal">
+                            <div class="takeaway-icon"><i class="fa-solid fa-expand-arrows-alt"></i></div>
+                            <div class="takeaway-num">01</div>
+                            <div class="takeaway-title">Quy mô mở rộng</div>
+                            <div class="takeaway-desc">World Cup tăng trưởng mạnh mẽ về số đội (13 ➔ 32) và sức hút tổ chức theo thời gian.</div>
+                        </div>
+                        <!-- Card 2 -->
+                        <div class="card accent-purple">
+                            <div class="takeaway-icon"><i class="fa-solid fa-lock"></i></div>
+                            <div class="takeaway-num">02</div>
+                            <div class="takeaway-title">Thống trị tập trung</div>
+                            <div class="takeaway-desc">Danh hiệu vô địch vẫn là cuộc chơi riêng biệt của các ông lớn châu Âu và Nam Mỹ.</div>
+                        </div>
+                        <!-- Card 3 -->
+                        <div class="card accent-amber">
+                            <div class="takeaway-icon"><i class="fa-solid fa-bolt-lightning"></i></div>
+                            <div class="takeaway-num">03</div>
+                            <div class="takeaway-title">Từng trận khó đoán</div>
+                            <div class="takeaway-desc">Thứ hạng FIFA không tuyệt đối. Cửa dưới vẫn tạo nên rất nhiều trận đấu lật đổ (upset) chấn động.</div>
+                        </div>
+                        <!-- Card 4 -->
+                        <div class="card accent-red">
+                            <div class="takeaway-icon"><i class="fa-solid fa-star"></i></div>
+                            <div class="takeaway-num">04</div>
+                            <div class="takeaway-title">Minh chứng 2022</div>
+                            <div class="takeaway-desc">Kỳ giải 2022 kết hợp trọn vẹn sự xuất sắc của elite (Argentina/Pháp) và phép màu outsider (Morocco).</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Demo Transition Banner -->
+                    <div class="demo-transition-banner fade-in-up delay-2">
+                        <div class="demo-transition-left">
+                            <i class="fa-solid fa-desktop"></i>
+                            <div>
+                                <div class="demo-title-sub">Giai đoạn tiếp theo</div>
+                                <div class="demo-title-main">Chuyển sang Dashboard Live Demo</div>
+                            </div>
+                        </div>
+                        
+                        <div class="demo-flow-steps">
+                            <span class="demo-step-badge">1. Overview</span>
+                            <i class="fa-solid fa-chevron-right"></i>
+                            <span class="demo-step-badge">2. Dominance</span>
+                            <i class="fa-solid fa-chevron-right"></i>
+                            <span class="demo-step-badge">3. Upsets</span>
+                            <i class="fa-solid fa-chevron-right"></i>
+                            <span class="demo-step-badge">4. WC 2022</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ==========================================
+             UI CONTROLS OVERLAY
+             ========================================== -->
+        <div class="controls-overlay">
+            <button class="nav-btn" id="prevBtn" title="Slide trước (Mũi tên Trái)"><i class="fa-solid fa-arrow-left"></i></button>
+            <div class="slide-indicator">
+                <span class="slide-indicator-current" id="currentNum">1</span>
+                <span>/</span>
+                <span id="totalNum">12</span>
+            </div>
+            <button class="nav-btn" id="nextBtn" title="Slide sau (Mũi tên Phải / Dấu cách)"><i class="fa-solid fa-arrow-right"></i></button>
+        </div>
+
+        <!-- Action Controls Group (Bottom Left) -->
+        <div class="left-controls-group">
+            <button class="action-btn btn-secondary" id="notesToggleBtn" title="Hiện gợi ý thuyết trình (Phím S)">
+                <i class="fa-regular fa-comment-dots"></i>
+                <span>Gợi ý thuyết trình</span>
+            </button>
+            <button class="action-btn" id="fullscreenToggleBtn" title="Bật/Tắt toàn màn hình (Phím F)">
+                <i class="fa-solid fa-expand"></i>
+                <span>Toàn màn hình</span>
+            </button>
+        </div>
+
+        <!-- Speaker Notes Drawer -->
+        <div class="speaker-notes-drawer" id="notesDrawer">
+            <div class="notes-header">
+                <div class="notes-title">
+                    <i class="fa-solid fa-volume-high"></i>
+                    <span>Kịch bản thuyết trình (Speaker Notes)</span>
+                </div>
+                <button class="notes-close" id="notesCloseBtn"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="notes-content" id="notesContent">
+                <!-- Sẽ được điền bằng JS dựa trên active slide -->
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Speaker notes data mapping
+        const speakerNotes = {
+            1: "<strong>[Slide 1 - Mở đầu]</strong> Chào thầy cô và các bạn, em xin đại diện nhóm 2 giới thiệu dashboard phân tích lịch sử FIFA World Cup. Dashboard không chỉ đơn thuần là liệt kê các bảng số liệu vô hồn, mà được nhóm thiết kế đi liền với một câu chuyện dữ liệu liền mạch: Sự tăng trưởng của quy mô, thế độc tôn bền vững của nhóm elite, và những bất ngờ đầy cảm xúc trong bóng đá. Công cụ chúng em sử dụng là Dash, Plotly kết hợp sức mạnh xử lý dữ liệu của thư viện Pandas.",
+            2: "<strong>[Slide 2 - Bài toán phân tích]</strong> Khi bắt tay vào thực hiện dự án này, thay vì chỉ làm một trang tra cứu kết quả thông thường, chúng em tự đặt ra một câu hỏi trung tâm: Liệu World Cup qua gần một thế kỷ mở rộng có thực sự trở nên cân bằng và toàn cầu hóa hơn không? Hay thực chất chiếc cúp vàng danh giá vẫn chỉ xoay quanh một nhóm nhỏ đội tuyển ưu tú (elite)? Để giải quyết bài toán lớn này, dashboard được chia ra trả lời 3 câu hỏi phụ: sự tiến hóa quy mô, bản đồ quyền lực vô địch, và mức độ khó đoán của các trận đấu dựa trên bảng xếp hạng FIFA.",
+            3: "<strong>[Slide 3 - Nguồn dữ liệu]</strong> Dashboard của chúng em được tích hợp từ 3 nguồn dữ liệu lớn rất đáng tin cậy. Thứ nhất là tệp tóm tắt lịch sử giúp nhìn nhận bức tranh tổng quan 22 kỳ World Cup từ thuở sơ khai 1930 đến 2022. Thứ hai là chi tiết standings của từng năm để phân tích sâu thành tích từng kỳ. Và cuối cùng là tệp khổng lồ gần 24,000 trận đấu quốc tế để đánh giá thực chất sức mạnh của bảng xếp hạng FIFA và tìm ra các trận lật đổ (upsets) chấn động.",
+            4: "<strong>[Slide 4 - Mạch kể chuyện]</strong> Mạch phân tích của dashboard được thiết kế theo cấu trúc tuyến tính 4 phần rất trực quan. Chúng ta sẽ bắt đầu bằng <strong>Expansion</strong> để thấy giải đấu ngày càng to lớn thế nào. Tiếp theo là <strong>Dominance</strong> để chứng minh quy mô lớn hơn chưa chắc đã giúp ngôi vương phân tán hơn. Bước ba là <strong>Upsets</strong> để đưa người xem về vẻ đẹp thực sự của bóng đá: sự bất ngờ khó đoán của từng trận đấu. Cuối cùng, chúng ta sẽ áp dụng các lý thuyết này vào một case study cụ thể đó là kỳ World Cup vô cùng cảm xúc năm 2022.",
+            5: "<strong>[Slide 5 - Kỹ thuật xây dựng]</strong> Về mặt kiến trúc kỹ thuật, dự án đi qua quy trình chuẩn mực: Đọc và làm sạch các nguồn dữ liệu CSV bằng thư viện Pandas, tạo ra các biểu đồ tương tác cao có khả năng zoom/hover bằng Plotly, và cuối cùng đóng gói vào ứng dụng web Dash đa trang (Multi-page). Dashboard được phân chia rõ ràng thành 4 trang chuyên biệt tương ứng với 4 chương của câu chuyện dữ liệu mà chúng em vừa trình bày.",
+            6: "<strong>[Slide 6 - Overview: Sự mở rộng]</strong> Đây là giao diện trang Overview đầu tiên của ứng dụng. Nhìn vào biểu đồ xu hướng, chúng ta thấy rõ quy mô World Cup đã phình to vượt bậc. Từ giải đấu nhỏ chỉ 13 đội bóng vào năm 1930, FIFA đã từng bước tăng số đội lên 16, 24 và đạt mốc ổn định 32 đội ở bóng đá hiện đại. Số trận đấu nhiều hơn đồng nghĩa với việc tổng số bàn thắng ghi được tăng vọt, đáp ứng nhu cầu thưởng thức của người hâm mộ trên khắp hành tinh.",
+            7: "<strong>[Slide 7 - Thiết kế trực quan Overview]</strong> Tại sao chúng em lại chọn Line Chart cho trang này? Bởi vì line chart là công cụ kể chuyện hoàn hảo nhất khi biểu diễn xu hướng theo tiến trình thời gian gần 100 năm. Chúng em đã khéo léo kết hợp point markers để định vị chính xác từng kỳ giải riêng biệt, đồng thời bổ sung các Annotations làm nổi bật những dấu mốc lịch sử như hai kỳ bị hủy do Thế chiến thứ hai, và một đường Reference Line trung bình hiệu suất bàn thắng giúp người xem nhận diện được ngay các kỳ đấu bùng nổ bàn thắng.",
+            8: "<strong>[Slide 8 - Dominance: Sự thống trị]</strong> Khi chuyển sang trang Dominance, người xem sẽ nhận được câu trả lời thú vị cho câu hỏi ở Slide 2. Dù giải đấu có quy mô khổng lồ, chức vô địch vẫn là 'câu lạc bộ độc quyền cực kỳ kín cổng'. Trong 22 kỳ tổ chức, chỉ có đúng 9 quốc gia được chạm tay vào cúp vàng. Bản đồ quyền lực bị chia cắt triệt để bởi UEFA (châu Âu) và CONMEBOL (Nam Mỹ). Trong đó, Brazil ngự trị ở đỉnh cao nhất với 5 lần lên ngôi vô địch.",
+            9: "<strong>[Slide 9 - Thiết kế trực quan Dominance]</strong> Để phân tích thế độc tôn này, chúng em thiết kế bộ 3 biểu đồ mạnh mẽ. Đầu tiên, Horizontal Bar Chart được sử dụng để so sánh trực quan số lần vô địch; độ dài của thanh ngang giúp bộ não con người nhận diện thứ hạng nhanh hơn nhiều so với biểu đồ tròn. Thứ hai, Stacked Bar Chart thể hiện tỷ lệ cơ cấu châu lục trong top 4 qua các năm để người xem thấy sự thống trị của châu Âu và Nam Mỹ bền vững thế nào. Và cuối cùng là một Ranked Table chi tiết hỗ trợ đắc lực cho việc tra cứu thông số phụ.",
+            10: "<strong>[Slide 10 - Upsets: Sự bất ngờ]</strong> Sự thú vị nằm ở trang Upsets. Để chứng minh bóng đá không chỉ dành riêng cho các ông lớn thống trị, biểu đồ Scatter Plot của chúng em phân tích chênh lệch thứ hạng FIFA đối trọng với hiệu số bàn thắng. Những chấm tròn được tô màu nổi bật biểu thị cho các trận 'Upset' - nơi đội cửa dưới lật đổ thành công người khổng lồ. Ứng dụng hỗ trợ tính năng tương tác Click Data: khi người dùng click vào bất kỳ chấm tròn nào, panel bên phải sẽ lập tức hiển thị thông tin chi tiết và tường thuật lại trận đấu đó.",
+            11: "<strong>[Slide 11 - Case Study: World Cup 2022]</strong> Đến với trang Tournament Detail, chúng em chọn năm 2022 làm case study tiêu biểu. Kỳ giải này hội tụ đầy đủ tinh hoa cốt truyện: Sự thống trị tuyệt đối của elite khi Argentina vô địch và Pháp giành á quân với chỉ số công thủ cực mạnh trên biểu đồ GF vs GA. Bên cạnh đó là sự bền bỉ của Croatia và đặc biệt là câu chuyện cổ tích mang tên Morocco - đội bóng châu Phi đầu tiên tiến vào top 4, minh chứng cho sự bất ngờ tuyệt diệu của giải đấu.",
+            12: "<strong>[Slide 12 - Kết luận & Demo]</strong> Tóm lại, dashboard đã làm sáng tỏ câu chuyện: World Cup đang mở rộng mạnh mẽ ra thế giới về mặt tổ chức, chiếc cúp vàng tuy vẫn nằm trong tay những thế lực elite châu Âu/Nam Mỹ, nhưng từng trận đấu cụ thể vẫn luôn ẩn chứa bất ngờ của những outsider quả cảm. Sau đây, em xin phép được trình chiếu dashboard thực tế để thầy cô và các bạn trải nghiệm trực tiếp các tính năng tương tác vô cùng mượt mờ này theo đúng mạch câu chuyện."
+        };
+
+        // Slide State Variables
+        let currentSlide = 1;
+        const totalSlides = 12;
+
+        const slideWrapper = document.getElementById('slideWrapper');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const currentNum = document.getElementById('currentNum');
+        const progressBar = document.getElementById('progressBar');
+        
+        // Buttons and UI Elements
+        const notesToggleBtn = document.getElementById('notesToggleBtn');
+        const notesDrawer = document.getElementById('notesDrawer');
+        const notesCloseBtn = document.getElementById('notesCloseBtn');
+        const notesContent = document.getElementById('notesContent');
+        const fullscreenToggleBtn = document.getElementById('fullscreenToggleBtn');
+
+        // Adjust slide scale dynamically to maintain 16:9 aspect ratio and center on screen
+        function adjustScale() {
+            const windowWidth = window.innerWidth;
+            const windowHeight = window.innerHeight;
+            
+            // Standard 16:9 resolution used for design
+            const targetWidth = 1920;
+            const targetHeight = 1080;
+            
+            // Calculate scale ratio
+            const scaleX = windowWidth / targetWidth;
+            const scaleY = windowHeight / targetHeight;
+            
+            // We want to fit the entire slide on screen, so take the minimum scale
+            // Restrict maximum scale to 1.15 to avoid over-stretching on huge monitors
+            let scale = Math.min(scaleX, scaleY);
+            
+            // Apply scale via CSS transform
+            slideWrapper.style.transform = `translate(-50%, -50%) scale(${scale})`;
+        }
+
+        // Initialize Scale adjustment on window load and resize
+        window.addEventListener('resize', adjustScale);
+        window.addEventListener('load', adjustScale);
+        adjustScale();
+
+        // Update Slide UI state
+        function updateSlideUI() {
+            // Update active state class on slides
+            const slides = document.querySelectorAll('.slide');
+            slides.forEach(slide => {
+                const slideNum = parseInt(slide.getAttribute('data-slide'));
+                slide.classList.remove('active', 'prev');
+                
+                if (slideNum === currentSlide) {
+                    slide.classList.add('active');
+                    // Reset scroll position of the new active slide content
+                    const content = slide.querySelector('.slide-content');
+                    if (content) content.scrollTop = 0;
+                } else if (slideNum < currentSlide) {
+                    slide.classList.add('prev');
+                }
+            });
+
+            // Update footer controls
+            currentNum.textContent = currentSlide;
+            
+            // Update top progress bar width
+            const percent = (currentSlide / totalSlides) * 100;
+            progressBar.style.width = `${percent}%`;
+
+            // Update speaker notes content
+            notesContent.innerHTML = speakerNotes[currentSlide] || "Không có ghi chú cho slide này.";
+            
+            // Enable/disable buttons based on boundaries
+            prevBtn.style.opacity = currentSlide === 1 ? '0.4' : '1';
+            prevBtn.style.pointerEvents = currentSlide === 1 ? 'none' : 'auto';
+            nextBtn.style.opacity = currentSlide === totalSlides ? '0.4' : '1';
+            nextBtn.style.pointerEvents = currentSlide === totalSlides ? 'none' : 'auto';
+        }
+
+        // Slide navigation functions
+        function nextSlide() {
+            if (currentSlide < totalSlides) {
+                currentSlide++;
+                updateSlideUI();
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 1) {
+                currentSlide--;
+                updateSlideUI();
+            }
+        }
+
+        // Event listeners for controls
+        nextBtn.addEventListener('click', nextSlide);
+        prevBtn.addEventListener('click', prevSlide);
+
+        // Fullscreen toggle logic
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().then(() => {
+                    fullscreenToggleBtn.classList.add('active');
+                    fullscreenToggleBtn.innerHTML = '<i class="fa-solid fa-compress"></i><span>Thu nhỏ</span>';
+                }).catch(err => {
+                    console.error(`Error attempting to enable fullscreen: ${err.message}`);
+                });
+            } else {
+                document.exitFullscreen().then(() => {
+                    fullscreenToggleBtn.classList.remove('active');
+                    fullscreenToggleBtn.innerHTML = '<i class="fa-solid fa-expand"></i><span>Toàn màn hình</span>';
+                });
+            }
+        }
+
+        // Listen for fullscreen change events (e.g. if user presses Esc to exit)
+        document.addEventListener('fullscreenchange', () => {
+            if (!document.fullscreenElement) {
+                fullscreenToggleBtn.classList.remove('active');
+                fullscreenToggleBtn.innerHTML = '<i class="fa-solid fa-expand"></i><span>Toàn màn hình</span>';
+            } else {
+                fullscreenToggleBtn.classList.add('active');
+                fullscreenToggleBtn.innerHTML = '<i class="fa-solid fa-compress"></i><span>Thu nhỏ</span>';
+            }
+        });
+
+        fullscreenToggleBtn.addEventListener('click', toggleFullscreen);
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+                e.preventDefault();
+                nextSlide();
+            } else if (e.key === 'ArrowLeft' || e.key === 'Backspace' || e.key === 'PageUp') {
+                e.preventDefault();
+                prevSlide();
+            } else if (e.key.toLowerCase() === 's') {
+                e.preventDefault();
+                toggleNotes();
+            } else if (e.key.toLowerCase() === 'f') {
+                e.preventDefault();
+                toggleFullscreen();
+            }
+        });
+
+        // Speaker notes panel toggle logic
+        function toggleNotes() {
+            notesDrawer.classList.toggle('open');
+            notesToggleBtn.classList.toggle('active');
+        }
+
+        notesToggleBtn.addEventListener('click', toggleNotes);
+        notesCloseBtn.addEventListener('click', () => {
+            notesDrawer.classList.remove('open');
+            notesToggleBtn.classList.remove('active');
+        });
+
+        // Initialize Slide UI on load
+        updateSlideUI();
+    </script>
+</body>
+</html>
