@@ -6,7 +6,7 @@ import os
 
 import pandas as pd
 import plotly.express as px
-from dash import Input, Output, dash_table, dcc, html
+from dash import Input, Output, State, dash_table, dcc, html
 
 from src.components import page_header
 from src.theme import COLORS, apply_chart_layout, empty_figure
@@ -168,7 +168,7 @@ def layout() -> html.Div:
             # Year filter
             html.Div(
                 className="filter-panel",
-                style={"gridTemplateColumns": "200px"},
+                style={"gridTemplateColumns": "200px auto"},
                 children=[
                     html.Div(
                         className="filter-block",
@@ -179,6 +179,29 @@ def layout() -> html.Div:
                                 options=[{"label": str(y), "value": y} for y in AVAILABLE_YEARS],
                                 value=2022,
                                 clearable=False,
+                            ),
+                        ],
+                    ),
+                    html.Div(
+                        className="filter-block",
+                        style={"justifyContent": "end", "height": "100%", "display": "flex", "flexDirection": "column"},
+                        children=[
+                            html.Label("Action", style={"visibility": "hidden"}),
+                            html.Button(
+                                "Áp dụng",
+                                id="tournament-apply-btn",
+                                style={
+                                    "padding": "8px 16px",
+                                    "background": "var(--accent)",
+                                    "color": "white",
+                                    "border": "none",
+                                    "borderRadius": "6px",
+                                    "cursor": "pointer",
+                                    "fontSize": "13px",
+                                    "fontWeight": "600",
+                                    "height": "38px",
+                                    "width": "120px"
+                                },
                             ),
                         ],
                     ),
@@ -282,9 +305,10 @@ def register_callbacks(app) -> None:
         Output("tournament-scatter-chart",       "figure"),
         Output("tournament-ranking-table",       "children"),
         Output("tournament-insight-panel",       "children"),
-        Input("tournament-year-dropdown", "value"),
+        Input("tournament-apply-btn", "n_clicks"),
+        State("tournament-year-dropdown", "value"),
     )
-    def update_all(year: int):
+    def update_all(n_clicks, year: int):
         df = _load_year(year)
         df_sorted = df.sort_values("Position").reset_index(drop=True)
         meta = summary_df[summary_df["YEAR"] == year]
@@ -313,9 +337,9 @@ def register_callbacks(app) -> None:
             avg     = f"{float(m['AVG GOALS PER GAME']):.2f}"
 
         # ── Goals For chart ───────────────────────────────────────────────────
-        gf_df = df_sorted[["Team", "Goals For", "position_group"]].copy()
+        gf_df = df_sorted[["Team", "Goals For", "position_group", "Position"]].copy()
         gf_df["Goals For"] = pd.to_numeric(gf_df["Goals For"], errors="coerce")
-        gf_df = gf_df.dropna(subset=["Goals For"]).sort_values("Goals For", ascending=True)
+        gf_df = gf_df.dropna(subset=["Goals For"]).sort_values("Position", ascending=False)
         gf_df["Label"] = gf_df["Team"].map(_short)
         if gf_df.empty:
             fig_gf = empty_figure(f"Sức tấn công {year}")
@@ -333,12 +357,13 @@ def register_callbacks(app) -> None:
                 margin={"l": 55, "r": 16, "t": 44, "b": 80},
                 legend={"orientation": "h", "yanchor": "top", "y": -0.09, "xanchor": "left", "x": 0, "font": {"size": 11}},
             )
+            fig_gf.update_yaxes(categoryorder="array", categoryarray=gf_df["Label"])
             fig_gf.update_traces(hovertemplate="%{customdata[0]}<br>Bàn ghi: %{x}<extra></extra>")
 
         # ── Goals Against chart ───────────────────────────────────────────────
-        ga_df = df_sorted[["Team", "Goals Against", "position_group"]].copy()
+        ga_df = df_sorted[["Team", "Goals Against", "position_group", "Position"]].copy()
         ga_df["Goals Against"] = pd.to_numeric(ga_df["Goals Against"], errors="coerce")
-        ga_df = ga_df.dropna(subset=["Goals Against"]).sort_values("Goals Against", ascending=True)
+        ga_df = ga_df.dropna(subset=["Goals Against"]).sort_values("Position", ascending=False)
         ga_df["Label"] = ga_df["Team"].map(_short)
         if ga_df.empty:
             fig_ga = empty_figure(f"Phòng ngự {year}")
@@ -356,6 +381,7 @@ def register_callbacks(app) -> None:
                 margin={"l": 55, "r": 16, "t": 44, "b": 80},
                 legend={"orientation": "h", "yanchor": "top", "y": -0.09, "xanchor": "left", "x": 0, "font": {"size": 11}},
             )
+            fig_ga.update_yaxes(categoryorder="array", categoryarray=ga_df["Label"])
             fig_ga.update_traces(hovertemplate="%{customdata[0]}<br>Bàn thủng: %{x}<extra></extra>")
 
         # ── Scatter ───────────────────────────────────────────────────────────
@@ -386,26 +412,9 @@ def register_callbacks(app) -> None:
                 type="line", x0=0, y0=0, x1=max_val, y1=max_val,
                 line={"dash": "dot", "color": COLORS["muted"], "width": 1.5},
             )
-            fig_sc.add_annotation(
-                x=max_val * 0.6, y=max_val * 0.6,
-                text="GF = GA", showarrow=False,
-                font={"size": 10, "color": COLORS["muted"]}, textangle=-35,
-            )
-            # Annotation vùng hướng dẫn đọc chart
-            fig_sc.add_annotation(
-                x=max_val * 0.12, y=max_val * 0.82,
-                text="Nhiều GA hơn GF<br>(thiên phòng ngự)",
-                showarrow=False, font={"size": 9, "color": COLORS["muted"]}, align="center",
-            )
-            fig_sc.add_annotation(
-                x=max_val * 0.82, y=max_val * 0.12,
-                text="Nhiều GF hơn GA<br>(thiên tấn công)",
-                showarrow=False, font={"size": 9, "color": COLORS["muted"]}, align="center",
-            )
             fig_sc.update_layout(
                 yaxis_autorange="reversed",
-                margin={"l": 48, "r": 48, "t": 56, "b": 48},
-                legend={"orientation": "h", "yanchor": "bottom", "y": 1.02, "xanchor": "right", "x": 1},
+                margin={"l": 48, "r": 48, "t": 64, "b": 80},
             )
             fig_sc.update_traces(
                 textposition="top center",

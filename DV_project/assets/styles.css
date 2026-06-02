@@ -234,7 +234,7 @@ body {
 }
 
 .upsets-filter-panel {
-    grid-template-columns: minmax(280px, 1.4fr) repeat(4, minmax(160px, 0.7fr));
+    grid-template-columns: minmax(220px, 1.2fr) repeat(4, minmax(120px, 0.7fr)) 100px;
 }
 
 .upsets-kpi-grid {
@@ -248,6 +248,11 @@ body {
 
 .upsets-chart-grid .chart-large {
     grid-row: span 2;
+    height: 736px;
+}
+
+.upsets-chart-grid .chart-card:not(.chart-large) {
+    height: 360px;
 }
 
 .upsets-detail-panel {
@@ -365,6 +370,11 @@ body {
 
     .upsets-chart-grid .chart-large {
         grid-row: auto;
+        height: 480px;
+    }
+
+    .upsets-chart-grid .chart-card:not(.chart-large) {
+        height: 360px;
     }
 }
 

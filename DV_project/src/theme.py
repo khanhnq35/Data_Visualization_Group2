@@ -60,12 +60,12 @@ def register_plotly_template() -> None:
             },
             legend={
                 "orientation": "h",
-                "yanchor": "bottom",
-                "y": 1.02,
-                "xanchor": "right",
-                "x": 1,
+                "yanchor": "top",
+                "y": -0.18,
+                "xanchor": "center",
+                "x": 0.5,
             },
-            margin={"l": 48, "r": 24, "t": 64, "b": 48},
+            margin={"l": 48, "r": 24, "t": 64, "b": 72},
         )
     )
     pio.templates.default = "worldcup"
@@ -82,7 +82,7 @@ def apply_chart_layout(fig: go.Figure, height: int = 380) -> go.Figure:
         template="worldcup",
         height=height,
         hovermode="closest",
-        margin={"l": 48, "r": 24, "t": 64, "b": 48},
+        margin={"l": 48, "r": 24, "t": 64, "b": 72},
     )
     return fig
 

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pandas as pd
 import plotly.graph_objects as go
-from dash import Input, Output, dcc, html
+from dash import Input, Output, State, dcc, html
 from plotly.subplots import make_subplots
 
 from src.components import graph_card, kpi_card, page_header
@@ -28,11 +28,12 @@ def layout() -> html.Div:
             ),
             html.Div(
                 className="filter-panel",
+                style={"gridTemplateColumns": "minmax(280px, 1.4fr) repeat(2, minmax(180px, 0.8fr)) auto"},
                 children=[
                     html.Div(
                         className="filter-block filter-wide",
                         children=[
-                            html.Label("Year range", htmlFor="overview-year-range"),
+                            html.Label("Year range: 1930 – 2022", id="overview-year-range-label", htmlFor="overview-year-range"),
                             dcc.RangeSlider(
                                 id="overview-year-range",
                                 min=int(years.min()),
@@ -41,7 +42,7 @@ def layout() -> html.Div:
                                 marks={int(year): str(int(year)) for year in years[::3]},
                                 step=None,
                                 allowCross=False,
-                                tooltip={"placement": "bottom", "always_visible": False},
+                                updatemode="mouseup",
                             ),
                         ],
                     ),
@@ -69,16 +70,27 @@ def layout() -> html.Div:
                             ),
                         ],
                     ),
-                ],
-            ),
-            html.Div(
-                className="insight-card",
-                children=[
-                    "Sau 92 năm, World Cup đã mở rộng từ ",
-                    html.Strong("13 lên 32 đội"),
-                    " — số trận tăng 4 lần, tổng bàn thắng tăng gấp đôi. "
-                    "Nhưng liệu sự mở rộng đó có thay đổi được trật tự quyền lực? ",
-                    html.Strong("Trang tiếp theo sẽ trả lời."),
+                    html.Div(
+                        className="filter-block",
+                        style={"justifyContent": "end", "height": "100%", "display": "flex", "flexDirection": "column"},
+                        children=[
+                            html.Button(
+                                "Áp dụng bộ lọc",
+                                id="overview-apply-btn",
+                                style={
+                                    "padding": "8px 16px",
+                                    "background": "var(--accent)",
+                                    "color": "white",
+                                    "border": "none",
+                                    "borderRadius": "6px",
+                                    "cursor": "pointer",
+                                    "fontSize": "13px",
+                                    "fontWeight": "600",
+                                    "height": "38px"
+                                },
+                            ),
+                        ],
+                    ),
                 ],
             ),
             html.Div(
@@ -131,6 +143,11 @@ def _scale_figure(df: pd.DataFrame) -> go.Figure:
     if df.empty:
         return empty_figure("Tournament Scale by Year")
 
+    df = df.copy()
+    for col in ["teams", "matches_played", "goals_scored"]:
+        pct = df[col].pct_change().multiply(100)
+        df[f"{col}_pct"] = pct.apply(lambda val: f"+{val:.1f}%" if val > 0 else (f"{val:.1f}%" if val <= 0 else "—"))
+
     fig = make_subplots(
         rows=3,
         cols=1,
@@ -144,15 +161,17 @@ def _scale_figure(df: pd.DataFrame) -> go.Figure:
         ("goals_scored", "Bàn thắng", COLORS["success"]),
     ]
     for index, (column, label, color) in enumerate(series, start=1):
+        marker_size = [12 if y == 1998 else 7 for y in df["year"]] if column == "teams" else 7
         fig.add_trace(
             go.Scatter(
                 x=df["year"],
                 y=df[column],
                 mode="lines+markers",
                 line={"width": 3, "color": color},
-                marker={"size": 7},
+                marker={"size": marker_size},
                 name=label,
-                hovertemplate=f"Năm: %{{x}}<br>{label}: %{{y:,}}<extra></extra>",
+                customdata=df[[f"{column}_pct"]].values,
+                hovertemplate=f"Năm: %{{x}}<br>{label}: %{{y:,}}<br>Thay đổi: %{{customdata[0]}}<extra></extra>",
             ),
             row=index,
             col=1,
@@ -164,34 +183,6 @@ def _scale_figure(df: pd.DataFrame) -> go.Figure:
         showlegend=False,
     )
     fig.update_xaxes(title_text="Năm", row=3, col=1)
-
-    # Annotation tại 1998 — bước nhảy quy mô
-    if 1998 in df["year"].values:
-        fig.add_annotation(
-            x=1998, y=df.loc[df["year"] == 1998, "teams"].values[0],
-            text="1998: 32 đội", showarrow=True, arrowhead=2,
-            ax=55, ay=-28, font={"size": 10, "color": COLORS["muted"]},
-            row=1, col=1,
-        )
-        fig.add_annotation(
-            x=1998, y=df.loc[df["year"] == 1998, "matches_played"].values[0],
-            text="64 trận", showarrow=True, arrowhead=2,
-            ax=45, ay=-28, font={"size": 10, "color": COLORS["muted"]},
-            row=2, col=1,
-        )
-
-    # Annotation tổng bàn thắng cao nhất và thấp nhất
-    if len(df) > 1:
-        idx_max_g = df["goals_scored"].idxmax()
-        yr_max_g = int(df.loc[idx_max_g, "year"])
-        val_max_g = int(df.loc[idx_max_g, "goals_scored"])
-        fig.add_annotation(
-            x=yr_max_g, y=val_max_g,
-            text=f"{yr_max_g}: {val_max_g} bàn",
-            showarrow=True, arrowhead=2, ax=50, ay=-30,
-            font={"size": 10, "color": COLORS["muted"]},
-            row=3, col=1,
-        )
 
     return apply_chart_layout(fig, height=620)
 
@@ -220,27 +211,6 @@ def _avg_goals_figure(df: pd.DataFrame) -> go.Figure:
         annotation_text=f"Trung bình: {mean_value:.2f}",
         annotation_position="bottom right",
     )
-
-    # Annotations tại điểm cực trị lịch sử
-    if not df.empty:
-        idx_max = df["avg_goals_per_game"].idxmax()
-        idx_min = df["avg_goals_per_game"].idxmin()
-        yr_max = df.loc[idx_max, "year"]
-        val_max = df.loc[idx_max, "avg_goals_per_game"]
-        yr_min = df.loc[idx_min, "year"]
-        val_min = df.loc[idx_min, "avg_goals_per_game"]
-        fig.add_annotation(
-            x=yr_max, y=val_max,
-            text=f"{yr_max}: {val_max:.1f} bàn/trận (cao nhất)",
-            showarrow=True, arrowhead=2, ax=50, ay=-30,
-            font={"size": 10, "color": COLORS["muted"]},
-        )
-        fig.add_annotation(
-            x=yr_min, y=val_min,
-            text=f"{yr_min}: {val_min:.1f} bàn/trận (thấp nhất)",
-            showarrow=True, arrowhead=2, ax=50, ay=30,
-            font={"size": 10, "color": COLORS["muted"]},
-        )
 
     fig.update_layout(title="Trung bình bàn thắng / trận")
     fig.update_xaxes(title="Năm")
@@ -290,21 +260,10 @@ def _champion_timeline_figure(df: pd.DataFrame) -> go.Figure:
             )
         )
 
-    # Annotation "5 lần" cho đội nhiều nhất
-    brazil_rows = df[df["champion_norm"] == "Brazil"]
-    if not brazil_rows.empty:
-        last_brazil_year = int(brazil_rows["year"].max())
-        fig.add_annotation(
-            x=last_brazil_year + 3, y="Brazil",
-            text="5 lần", showarrow=False,
-            font={"size": 12, "color": COLORS["accent_2"]},
-            xanchor="left",
-        )
-
     fig.update_layout(
         title="Lịch sử nhà vô địch World Cup (1930–2022)",
         showlegend=True,
-        legend={"orientation": "h", "yanchor": "bottom", "y": 1.02, "xanchor": "right", "x": 1},
+        margin={"l": 90, "r": 24, "t": 64, "b": 72},
     )
     fig.update_xaxes(title="Năm")
     fig.update_yaxes(title="Nhà vô địch")
@@ -312,6 +271,14 @@ def _champion_timeline_figure(df: pd.DataFrame) -> go.Figure:
 
 
 def register_callbacks(app) -> None:
+    @app.callback(
+        Output("overview-year-range-label", "children"),
+        Input("overview-year-range", "value"),
+    )
+    def update_overview_label(year_range):
+        y_min, y_max = (year_range[0], year_range[1]) if year_range and len(year_range) == 2 else (1930, 2022)
+        return f"Year range: {y_min} – {y_max}"
+
     @app.callback(
         Output("overview-kpi-tournaments", "children"),
         Output("overview-kpi-teams", "children"),
@@ -321,11 +288,12 @@ def register_callbacks(app) -> None:
         Output("overview-scale-chart", "figure"),
         Output("overview-avg-goals-chart", "figure"),
         Output("overview-champion-timeline", "figure"),
-        Input("overview-year-range", "value"),
-        Input("overview-host-filter", "value"),
-        Input("overview-champion-filter", "value"),
+        Input("overview-apply-btn", "n_clicks"),
+        State("overview-year-range", "value"),
+        State("overview-host-filter", "value"),
+        State("overview-champion-filter", "value"),
     )
-    def update_overview(year_range, hosts, champions):
+    def update_overview(n_clicks, year_range, hosts, champions):
         filtered = _filter_summary(year_range, hosts, champions)
 
         tournaments = len(filtered)

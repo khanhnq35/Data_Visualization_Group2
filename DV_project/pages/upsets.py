@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pandas as pd
 import plotly.express as px
-from dash import Input, Output, ctx, dcc, html
+from dash import Input, Output, State, ctx, dcc, html
 
 from src.components import graph_card, page_header
 from src.data import load_upsets_data
@@ -30,6 +30,22 @@ def layout() -> html.Div:
     year_max = int(df["year"].max())
     default_min = max(2000, year_min)
 
+    years = sorted(df["year"].dropna().unique())
+    year_slider_marks = {}
+    for y in years:
+        y_int = int(y)
+        if y_int == year_min or y_int == year_max:
+            year_slider_marks[y_int] = {
+                "label": str(y_int),
+                "style": {"color": "#64727d", "fontSize": "11px", "whiteSpace": "nowrap"},
+            }
+        elif y_int % 10 == 0:
+            if abs(y_int - year_min) >= 3 and abs(y_int - year_max) >= 3:
+                year_slider_marks[y_int] = {
+                    "label": str(y_int),
+                    "style": {"color": "#64727d", "fontSize": "11px", "whiteSpace": "nowrap"},
+                }
+
     return html.Div(
         className="page-stack",
         children=[
@@ -44,16 +60,16 @@ def layout() -> html.Div:
                     html.Div(
                         className="filter-block filter-wide",
                         children=[
-                            html.Label("Year range", htmlFor="upsets-year-slider"),
+                            html.Label("Year range: 2000 – 2024", id="upsets-year-slider-label", htmlFor="upsets-year-slider"),
                             dcc.RangeSlider(
                                 id="upsets-year-slider",
                                 min=year_min,
                                 max=year_max,
                                 step=1,
                                 value=[default_min, year_max],
-                                marks={year: str(year) for year in range(year_min, year_max + 1, 4)},
+                                marks=year_slider_marks,
                                 allowCross=False,
-                                tooltip={"placement": "bottom", "always_visible": False},
+                                updatemode="mouseup",
                             ),
                         ],
                     ),
@@ -105,21 +121,33 @@ def layout() -> html.Div:
                                 ],
                                 value="All",
                                 clearable=False,
+                              ),
+                        ],
+                    ),
+                    html.Div(
+                        className="filter-block",
+                        style={"justifyContent": "end", "height": "100%", "display": "flex", "flexDirection": "column"},
+                        children=[
+                            html.Label("Action", style={"visibility": "hidden"}),
+                            html.Button(
+                                "Áp dụng",
+                                id="upsets-apply-btn",
+                                style={
+                                    "padding": "8px 16px",
+                                    "background": "var(--accent)",
+                                    "color": "white",
+                                    "border": "none",
+                                    "borderRadius": "6px",
+                                    "cursor": "pointer",
+                                    "fontSize": "13px",
+                                    "fontWeight": "600",
+                                    "height": "38px",
+                                    "width": "100%",
+                                    "minWidth": "90px"
+                                },
                             ),
                         ],
                     ),
-                ],
-            ),
-            html.Div(
-                className="insight-card",
-                children=[
-                    "Dữ liệu ",
-                    html.Strong("23,921 trận quốc tế"),
-                    " cho thấy bóng đá phức tạp hơn bất kỳ công thức nào. "
-                    "Đội được xếp hạng thấp hơn vẫn thắng thường xuyên hơn bạn nghĩ — "
-                    "đây là bằng chứng rằng ",
-                    html.Strong("bảng xếp hạng FIFA không quyết định tất cả"),
-                    ".",
                 ],
             ),
             html.Div(id="upsets-kpi-row", className="kpi-grid upsets-kpi-grid"),
@@ -278,7 +306,7 @@ def _scatter_figure(df: pd.DataFrame):
         color_discrete_map={True: COLOR_UPSET, False: COLOR_NORMAL},
         custom_data=_custom_data_columns(),
         labels={"rank_gap": "Chênh lệch hạng FIFA", "home_goal_diff": "Chênh lệch bàn thắng"},
-        title="Hạng FIFA và kết quả trận đấu",
+        title="Chênh lệch hạng FIFA vs chênh lệch bàn thắng",
     )
     fig.update_traces(
         marker={"size": 6, "line": {"width": 0.5, "color": "white"}, "opacity": 0.6},
@@ -300,28 +328,19 @@ def _scatter_figure(df: pd.DataFrame):
     )
     fig.add_hline(y=0, line_dash="dash", line_color=COLORS["border"], opacity=0.8)
     fig.add_vline(x=0, line_dash="dash", line_color=COLORS["border"], opacity=0.8)
-
-    # Annotation vùng quadrant
-    if not df.empty:
-        max_rg = float(df["rank_gap"].quantile(0.92))
-        max_gd = float(df["home_goal_diff"].quantile(0.88))
-        min_gd = float(df["home_goal_diff"].quantile(0.08))
-        fig.add_annotation(
-            x=max_rg * 0.65, y=max_gd * 0.7,
-            text="Đội yếu hơn nhưng THẮNG<br>(upset!)",
-            showarrow=False,
-            font={"size": 9, "color": COLOR_UPSET},
-            align="center",
-        )
-        fig.add_annotation(
-            x=max_rg * 0.65, y=min_gd * 0.65,
-            text="Đội yếu hơn, thua nhiều<br>(dự đoán được)",
-            showarrow=False,
-            font={"size": 9, "color": COLORS["muted"]},
-            align="center",
-        )
-
-    return apply_chart_layout(fig, height=480)
+    fig = apply_chart_layout(fig, height=480)
+    fig.update_layout(
+        legend={
+            "orientation": "v",
+            "yanchor": "top",
+            "y": 0.98,
+            "xanchor": "left",
+            "x": 0.02,
+            "bgcolor": "rgba(255, 255, 255, 0.7)",
+        },
+        margin={"l": 75, "r": 24, "t": 80, "b": 60},
+    )
+    return fig
 
 
 def _top_upsets_figure(df: pd.DataFrame):
@@ -427,18 +446,31 @@ def register_callbacks(app) -> None:
         return _filtered_options(year_range, tournament, team, continent)
 
     @app.callback(
+        Output("upsets-year-slider-label", "children"),
+        Input("upsets-year-slider", "value"),
+    )
+    def update_upsets_label(year_range):
+        y_min, y_max = (year_range[0], year_range[1]) if year_range and len(year_range) == 2 else (2000, 2024)
+        return f"Year range: {y_min} – {y_max}"
+
+    @app.callback(
         Output("upsets-scatter-plot", "figure"),
         Output("upsets-bar-chart", "figure"),
         Output("upsets-stacked-bar", "figure"),
         Output("upsets-kpi-row", "children"),
-        Input("upsets-year-slider", "value"),
-        Input("upsets-tournament-dropdown", "value"),
-        Input("upsets-team-dropdown", "value"),
-        Input("upsets-continent-dropdown", "value"),
-        Input("upsets-match-type-dropdown", "value"),
+        Input("upsets-apply-btn", "n_clicks"),
+        State("upsets-year-slider", "value"),
+        State("upsets-tournament-dropdown", "value"),
+        State("upsets-team-dropdown", "value"),
+        State("upsets-continent-dropdown", "value"),
+        State("upsets-match-type-dropdown", "value"),
     )
-    def update_graphs(year_range, tournament, team, continent, match_type):
+    def update_graphs(n_clicks, year_range, tournament, team, continent, match_type):
+        if not year_range or len(year_range) != 2:
+            df = load_upsets_data()
+            year_range = [int(df["year"].min()), int(df["year"].max())]
         filtered = _filter_matches(year_range, tournament, team, continent, match_type)
+
         return (
             _scatter_figure(filtered),
             _top_upsets_figure(filtered),
@@ -457,9 +489,14 @@ def register_callbacks(app) -> None:
         if not click_data:
             return _default_detail()
 
-        date_str, tournament, home_team, home_rank, home_score, away_score, away_rank, away_team, _ = (
-            click_data["points"][0]["customdata"]
-        )
+        try:
+            customdata = click_data["points"][0].get("customdata")
+            if not customdata or len(customdata) < 9:
+                return _default_detail()
+            date_str, tournament, home_team, home_rank, home_score, away_score, away_rank, away_team, _ = customdata
+        except Exception:
+            return _default_detail()
+
         return html.Div(
             children=[
                 html.Div("Selected match details", className="upsets-detail-title"),

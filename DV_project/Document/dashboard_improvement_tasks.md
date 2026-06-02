@@ -76,10 +76,10 @@ Dashboard FIFA World Cup hiện tại đã có kiến trúc tốt, hệ thống 
 6. Kiểm tra màu sắc hiện tại: xác nhận `COLOR_UPSET` trong `upsets.py` là `"#f97316"` (orange), `POS_COLORS["Top 8"]` trong `tournament.py` là `"#7c3aed"` (purple).
 
 **Tiêu chí chấp nhận:**
-- [ ] App khởi động không có exception.
-- [ ] Cả 4 trang render không có lỗi callback.
-- [ ] Trang Tournament mặc định hiển thị năm 2022.
-- [ ] Màu CVD-safe đã được áp dụng (orange cho upset, purple cho Top 8).
+- [x] App khởi động không có exception.
+- [x] Cả 4 trang render không có lỗi callback.
+- [x] Trang Tournament mặc định hiển thị năm 2022.
+- [x] Màu CVD-safe đã được áp dụng (orange cho upset, purple cho Top 8).
 
 **Bước kiểm tra:** Mở browser console (F12), kiểm tra không có lỗi đỏ. Kiểm tra Network tab không có failed requests.
 
@@ -102,10 +102,10 @@ Dashboard FIFA World Cup hiện tại đã có kiến trúc tốt, hệ thống 
 4. Kiểm tra trang Tournament: KHÔNG có insight card — thay vào đó có 2022 panel ở cuối trang.
 
 **Tiêu chí chấp nhận:**
-- [ ] Overview: "Sau 92 năm, World Cup đã mở rộng từ **13 lên 32 đội**..."
-- [ ] Dominance: "**Chỉ 9 đội chia nhau 22 chức vô địch.**..."
-- [ ] Upsets: "Dữ liệu **23,921 trận quốc tế**..."
-- [ ] CSS `.insight-card` hiển thị đúng màu và border.
+- [x] Overview: "Sau 92 năm, World Cup đã mở rộng từ **13 lên 32 đội**..."
+- [x] Dominance: "**Chỉ 9 đội chia nhau 22 chức vô địch.**..."
+- [x] Upsets: "Dữ liệu **23,921 trận quốc tế**..."
+- [x] CSS `.insight-card` hiển thị đúng màu và border.
 
 **Bước kiểm tra:** Chụp màn hình insight card từng trang, so sánh với thiết kế mong muốn.
 
@@ -138,9 +138,9 @@ Dashboard FIFA World Cup hiện tại đã có kiến trúc tốt, hệ thống 
 4. Lưu file, reload app, kiểm tra Tournament 2022 — xác nhận không còn màu xanh lá trong bar charts và scatter.
 
 **Tiêu chí chấp nhận:**
-- [ ] `POS_COLORS["Top 8"]` = `"#7c3aed"` (không phải `COLORS["success"]`).
-- [ ] Trang Tournament 2022: bar chart GF và GA không có màu xanh lá.
-- [ ] Scatter chart: 4 nhóm (Champion/amber, Top4/teal, Top8/purple, Other/grey) phân biệt rõ.
+- [x] `POS_COLORS["Top 8"]` = `"#7c3aed"` (không phải `COLORS["success"]`).
+- [x] Trang Tournament 2022: bar chart GF và GA không có màu xanh lá.
+- [x] Scatter chart: 4 nhóm (Champion/amber, Top4/teal, Top8/purple, Other/grey) phân biệt rõ.
 
 **Bước kiểm tra:** Mở Tournament 2022. Kiểm tra legend của scatter chart — xác nhận "Top 8" hiện màu tím (`#7c3aed`).
 
@@ -170,11 +170,11 @@ Dashboard FIFA World Cup hiện tại đã có kiến trúc tốt, hệ thống 
 4. Kiểm tra stacked bar: Home Win = xanh dương, Away Win = cam, Draw = xám nhạt.
 
 **Tiêu chí chấp nhận:**
-- [ ] `COLOR_UPSET = "#f97316"` (orange).
-- [ ] `COLOR_HOME = "#1d4ed8"` (blue).
-- [ ] `COLOR_AWAY = "#f97316"` (orange).
-- [ ] Scatter plot: Điểm cam (upset) nổi bật rõ trên nền xám.
-- [ ] Stacked bar: 3 màu phân biệt rõ, Blue/Orange/LightGray.
+- [x] `COLOR_UPSET = "#f97316"` (orange).
+- [x] `COLOR_HOME = "#1d4ed8"` (blue).
+- [x] `COLOR_AWAY = "#f97316"` (orange).
+- [x] Scatter plot: Điểm cam (upset) nổi bật rõ trên nền xám.
+- [x] Stacked bar: 3 màu phân biệt rõ, Blue/Orange/LightGray.
 
 **Bước kiểm tra:** Mở Upsets page. Chụp màn hình scatter plot và stacked bar. Xác nhận không có màu đỏ.
 
@@ -197,8 +197,8 @@ Dashboard FIFA World Cup hiện tại đã có kiến trúc tốt, hệ thống 
 4. Reload app, kiểm tra trang Overview — đường avg goals phải là màu teal.
 
 **Tiêu chí chấp nhận:**
-- [ ] Đường avg goals/game là màu teal (`#007c89`), không phải đỏ.
-- [ ] Đường hline trung bình vẫn là `COLORS["muted"]` (xám).
+- [x] Đường avg goals/game là màu teal (`#007c89`), không phải đỏ.
+- [x] Đường hline trung bình vẫn là `COLORS["muted"]` (xám).
 
 **Bước kiểm tra:** Mở Overview, cuộn đến chart avg goals. Xác nhận màu đường là teal.
 
@@ -234,10 +234,10 @@ Cho `_champion_timeline_figure()` (dòng ~282):
 3. Insight về số lần vô địch sẽ có từ annotation và hover tooltip.
 
 **Tiêu chí chấp nhận:**
-- [ ] `_scale_figure()`: title ≤ 8 từ, không có dấu chấm than hoặc câu hỏi.
-- [ ] `_avg_goals_figure()`: title ≤ 6 từ tiếng Việt.
-- [ ] `_champion_timeline_figure()`: title ≤ 8 từ, có năm phạm vi.
-- [ ] Tất cả annotations trên chart vẫn hoạt động đúng sau khi đổi title.
+- [x] `_scale_figure()`: title ≤ 8 từ, không có dấu chấm than hoặc câu hỏi.
+- [x] `_avg_goals_figure()`: title ≤ 6 từ tiếng Việt.
+- [x] `_champion_timeline_figure()`: title ≤ 8 từ, có năm phạm vi.
+- [x] Tất cả annotations trên chart vẫn hoạt động đúng sau khi đổi title.
 
 **Bước kiểm tra:** Reload trang Overview, đọc tiêu đề 3 chart — kiểm tra không có tiêu đề dài quá 10 từ.
 
@@ -270,9 +270,9 @@ Cho `dominance-goals-for-chart` (dòng ~394):
 2. Đổi thành: `"Tổng bàn thắng — Top 20 đội (lịch sử)"`.
 
 **Tiêu chí chấp nhận:**
-- [ ] `dominance-champion-bar`: title ≤ 6 từ.
+- [x] `dominance-champion-bar`: title ≤ 6 từ.
 - [ ] `dominance-top4-by-continent`: title ≤ 8 từ.
-- [ ] `dominance-goals-for-chart`: title ≤ 8 từ.
+- [x] `dominance-goals-for-chart`: title ≤ 8 từ.
 
 **Bước kiểm tra:** Reload trang Dominance, kiểm tra 3 chart titles.
 
@@ -305,9 +305,9 @@ Cho `_neutral_result_figure()` (dòng ~364):
 3. Insight về "lợi thế sân nhà giảm" tự hiện qua annotation "Tổng: X trận" và chiều cao các phân đoạn màu.
 
 **Tiêu chí chấp nhận:**
-- [ ] `_scatter_figure()`: title ≤ 8 từ.
-- [ ] `_top_upsets_figure()`: title ≤ 8 từ.
-- [ ] `_neutral_result_figure()`: title ≤ 8 từ.
+- [x] `_scatter_figure()`: title ≤ 8 từ.
+- [x] `_top_upsets_figure()`: title ≤ 8 từ.
+- [x] `_neutral_result_figure()`: title ≤ 8 từ.
 
 **Bước kiểm tra:** Reload trang Upsets, kiểm tra 3 chart titles.
 
@@ -339,9 +339,9 @@ Cho Scatter chart (dòng ~379):
 2. Giữ nguyên.
 
 **Tiêu chí chấp nhận:**
-- [ ] Goals For: title có năm, ≤ 6 từ.
-- [ ] Goals Against: title có năm và gợi ý đọc chart, hoặc annotation thay thế.
-- [ ] Scatter: title có năm, ≤ 6 từ.
+- [x] Goals For: title có năm, ≤ 6 từ.
+- [x] Goals Against: title có năm và gợi ý đọc chart, hoặc annotation thay thế.
+- [x] Scatter: title có năm, ≤ 6 từ.
 
 **Bước kiểm tra:** Chọn năm 2022 và năm 1930 — kiểm tra title thay đổi đúng theo năm.
 
@@ -382,11 +382,11 @@ Cho Scatter chart (dòng ~379):
    - Lưu ý: cần dùng `go.Scatter` với `marker={"size": [...],...}` thay vì constant size.
 
 **Tiêu chí chấp nhận:**
-- [ ] Annotation "1998: Mở rộng lên 32 đội" hiển thị trên subplot Teams với mũi tên.
-- [ ] Annotation "64 trận từ 1998" hiển thị trên subplot Matches.
-- [ ] Annotation tổng bàn thắng cao nhất hiển thị trên subplot Goals.
-- [ ] Marker tại 1998 trên Teams lớn hơn các năm khác (size 12 vs 7).
-- [ ] Không có lỗi khi filter chọn khoảng năm không bao gồm 1998.
+- [x] Annotation "1998: Mở rộng lên 32 đội" hiển thị trên subplot Teams với mũi tên.
+- [x] Annotation "64 trận từ 1998" hiển thị trên subplot Matches.
+- [x] Annotation tổng bàn thắng cao nhất hiển thị trên subplot Goals.
+- [x] Marker tại 1998 trên Teams lớn hơn các năm khác (size 12 vs 7).
+- [x] Không có lỗi khi filter chọn khoảng năm không bao gồm 1998.
 
 **Bước kiểm tra:** Mở Overview với bộ lọc mặc định (1930–2022). Kiểm tra 3 annotation xuất hiện đúng vị trí. Thử filter 2000–2022 — annotation 1998 không được xuất hiện (vì check `if 1998 in df["year"].values`).
 
@@ -422,10 +422,10 @@ Cho Scatter chart (dòng ~379):
 4. Kiểm tra annotation không bị cắt ở cạnh chart — nếu cần, tăng `margin={"r": 60}`.
 
 **Tiêu chí chấp nhận:**
-- [ ] Legend hiển thị "Chủ nhà vô địch" (star symbol) và "Đội khách vô địch" (circle).
-- [ ] Annotation "5 lần" xuất hiện bên phải hàng Brazil.
-- [ ] Annotation không bị cắt (xanchor="left", đủ margin phải).
-- [ ] Khi filter không bao gồm Brazil, annotation không xuất hiện.
+- [x] Legend hiển thị "Chủ nhà vô địch" (star symbol) và "Đội khách vô địch" (circle).
+- [x] Annotation "5 lần" xuất hiện bên phải hàng Brazil.
+- [x] Annotation không bị cắt (xanchor="left", đủ margin phải).
+- [x] Khi filter không bao gồm Brazil, annotation không xuất hiện.
 
 **Bước kiểm tra:** Mở Overview mặc định. Kiểm tra legend timeline. Zoom vào hàng Brazil — annotation "5 lần" phải hiển thị rõ.
 
@@ -483,11 +483,11 @@ Cho Scatter chart (dòng ~379):
 4. Reload app — kiểm tra chart: đội nhiều nhất (thường là Brazil) phải có màu amber nổi bật.
 
 **Tiêu chí chấp nhận:**
-- [ ] Đội có số lần vô địch nhiều nhất (Brazil = 5) có màu amber (`#d98324`).
-- [ ] Tất cả đội khác có màu xám nhạt (`#cbd5e1`).
-- [ ] Annotation "5 lần" xuất hiện bên phải bar Brazil.
-- [ ] Khi filter thay đổi (ví dụ: chỉ xem châu Âu), đội khác (Germany = 4) trở thành amber.
-- [ ] Legend ẩn (`showlegend=False`).
+- [x] Đội có số lần vô địch nhiều nhất (Brazil = 5) có màu amber (`#d98324`).
+- [x] Tất cả đội khác có màu xám nhạt (`#cbd5e1`).
+- [x] Annotation "5 lần" xuất hiện bên phải bar Brazil.
+- [x] Khi filter thay đổi (ví dụ: chỉ xem châu Âu), đội khác (Germany = 4) trở thành amber.
+- [x] Legend ẩn (`showlegend=False`).
 
 **Bước kiểm tra:** Mở Dominance mặc định. Xác nhận bar Brazil màu amber. Dùng filter chọn chỉ châu Âu — Germany phải trở thành amber.
 
@@ -523,10 +523,10 @@ Cho Scatter chart (dòng ~379):
 3. Xoay nhãn trục X 45°: `top4_fig.update_xaxes(tickangle=-45)`.
 
 **Tiêu chí chấp nhận:**
-- [ ] 4 vùng vrect hiển thị nhẹ (opacity thấp, không che khuất bars).
-- [ ] Nhãn giai đoạn nhỏ, màu muted, không cạnh tranh với data.
-- [ ] Nhãn X axis xoay 45° không chồng chéo.
-- [ ] Chart vẫn hiển thị đúng khi filter year range.
+- [x] 4 vùng vrect hiển thị nhẹ (opacity thấp, không che khuất bars).
+- [x] Nhãn giai đoạn nhỏ, màu muted, không cạnh tranh với data.
+- [x] Nhãn X axis xoay 45° không chồng chéo.
+- [x] Chart vẫn hiển thị đúng khi filter year range.
 
 **Bước kiểm tra:** Mở Dominance. Scroll đến stacked bar. Kiểm tra 4 vùng phân tách thấy rõ nhưng không che khuất bars.
 
@@ -561,8 +561,8 @@ Cho Scatter chart (dòng ~379):
    ```
 
 **Tiêu chí chấp nhận:**
-- [ ] Hover vào Brazil: hiển thị "Tổng bàn thắng: X, Số lần tham dự: 22, Trung bình: Y.Y bàn/kỳ".
-- [ ] Không có lỗi khi `appearances = 0` (chia cho 0) — đã xử lý bằng `.round(1)` và Pandas sẽ trả về `NaN`.
+- [x] Hover vào Brazil: hiển thị "Tổng bàn thắng: X, Số lần tham dự: 22, Trung bình: Y.Y bàn/kỳ".
+- [x] Không có lỗi khi `appearances = 0` (chia cho 0) — đã xử lý bằng `.round(1)` và Pandas sẽ trả về `NaN`.
 
 **Bước kiểm tra:** Mở Dominance, hover vào bar Brazil trong Goals For chart — kiểm tra tooltip hiện đầy đủ 3 dòng thông tin.
 
@@ -608,9 +608,9 @@ Cho Scatter chart (dòng ~379):
    ```
 
 **Tiêu chí chấp nhận:**
-- [ ] 2 annotation xuất hiện ở góc phải-dưới và phải-trên.
-- [ ] Annotation màu muted và orange — nhỏ, không che điểm dữ liệu.
-- [ ] Không có lỗi khi df rỗng (return sớm với `empty_figure`).
+- [x] 2 annotation xuất hiện ở góc phải-dưới và phải-trên.
+- [x] Annotation màu muted và orange — nhỏ, không che điểm dữ liệu.
+- [x] Không có lỗi khi df rỗng (return sớm với `empty_figure`).
 
 **Bước kiểm tra:** Mở Upsets, xem scatter plot. Kiểm tra 2 annotation vùng quadrant nhỏ ở góc phải.
 
@@ -638,8 +638,8 @@ Cho Scatter chart (dòng ~379):
 3. Reload app — kiểm tra legend scatter plot hiển thị tên đúng.
 
 **Tiêu chí chấp nhận:**
-- [ ] Legend hiển thị "Upset — Đội yếu thắng" (màu cam) và "Kết quả thông thường" (màu xám).
-- [ ] Không có "True" hoặc "False" trong legend.
+- [x] Legend hiển thị "Upset — Đội yếu thắng" (màu cam) và "Kết quả thông thường" (màu xám).
+- [x] Không có "True" hoặc "False" trong legend.
 
 **Bước kiểm tra:** Mở Upsets, nhìn legend của scatter plot.
 
@@ -682,10 +682,10 @@ Cho Scatter chart (dòng ~379):
    ```
 
 **Tiêu chí chấp nhận:**
-- [ ] Đường diagonal (nét đứt, màu xám) hiển thị từ góc (0,0) đến (max, max).
-- [ ] Label "GF = GA" hiển thị gần đường diagonal.
-- [ ] Champion (ARG 2022) nằm ở góc phải-trên (nhiều GF, ít GA — do `yaxis_autorange="reversed"`).
-- [ ] `yaxis_autorange="reversed"` vẫn được giữ nguyên.
+- [x] Đường diagonal (nét đứt, màu xám) hiển thị từ góc (0,0) đến (max, max).
+- [x] Label "GF = GA" hiển thị gần đường diagonal.
+- [x] Champion (ARG 2022) nằm ở góc phải-trên (nhiều GF, ít GA — do `yaxis_autorange="reversed"`).
+- [x] `yaxis_autorange="reversed"` vẫn được giữ nguyên.
 
 **Bước kiểm tra:** Mở Tournament 2022. Kiểm tra scatter: Argentina phải nằm gần góc phải-trên. Đường diagonal phải đi từ góc dưới-trái sang góc trên-phải (với trục Y đảo).
 
@@ -711,8 +711,8 @@ Cho Scatter chart (dòng ~379):
 4. Kiểm tra: Trang Tournament 2022, chart GA — Morocco (4 GA) và France (8 GA) phải ở gần trên, các đội tệ nhất ở dưới.
 
 **Tiêu chí chấp nhận:**
-- [ ] Goals Against chart: đội ít bị thủng lưới nhất ở trên cùng.
-- [ ] Nhất quán với Goals For (nhiều GF ở trên = đội tấn công mạnh nhất ở trên).
+- [x] Goals Against chart: đội ít bị thủng lưới nhất ở trên cùng.
+- [x] Nhất quán với Goals For (nhiều GF ở trên = đội tấn công mạnh nhất ở trên).
 
 **Bước kiểm tra:** Mở Tournament 2022. Kiểm tra GA chart: team ở đỉnh phải có số GA nhỏ nhất.
 
@@ -737,10 +737,10 @@ Cho Scatter chart (dòng ~379):
 3. Kiểm tra: Tournament 2022 — insight panel hiển thị 4 cards với màu phân biệt rõ.
 
 **Tiêu chí chấp nhận:**
-- [ ] Argentina: amber (`#d98324`) — Champion color.
-- [ ] France: teal (`#007c89`) — Runner-up/Top 4 color.
-- [ ] Croatia: accent teal hoặc neutral.
-- [ ] Morocco: không dùng xanh lá (`#2f855a`) trong cùng panel với đỏ.
+- [x] Argentina: amber (`#d98324`) — Champion color.
+- [x] France: teal (`#007c89`) — Runner-up/Top 4 color.
+- [x] Croatia: accent teal hoặc neutral.
+- [x] Morocco: không dùng xanh lá (`#2f855a`) trong cùng panel với đỏ.
 
 **Bước kiểm tra:** Mở Tournament 2022. Scroll xuống insight panel. Kiểm tra 4 màu card.
 
@@ -771,8 +771,8 @@ Cho Scatter chart (dòng ~379):
 4. Kiểm tra `dominance-summary-table` khi `filtered` rỗng — `table_data = []` đã được handle đúng.
 
 **Tiêu chí chấp nhận:**
-- [ ] Filter chọn một team không có title → champion bar hiện message "Không có dữ liệu. Thử..."
-- [ ] Message rõ ràng, ngắn gọn, hướng dẫn hành động.
+- [x] Filter chọn một team không có title → champion bar hiện message "Không có dữ liệu. Thử..."
+- [x] Message rõ ràng, ngắn gọn, hướng dẫn hành động.
 
 **Bước kiểm tra:** Trang Dominance, filter chọn "Tunisia" (team chưa từng vô địch). Champion bar phải hiện empty state với message hướng dẫn.
 
@@ -814,9 +814,9 @@ Cho Scatter chart (dòng ~379):
    ```
 
 **Tiêu chí chấp nhận:**
-- [ ] Nút "Đặt lại" xuất hiện trong filter panel.
-- [ ] Click nút: tất cả filter reset về mặc định (1930–2022, tất cả team, tất cả continent, tất cả position).
-- [ ] `prevent_initial_call=True` đảm bảo không trigger khi load lần đầu.
+- [x] Nút "Đặt lại" xuất hiện trong filter panel.
+- [x] Click nút: tất cả filter reset về mặc định (1930–2022, tất cả team, tất cả continent, tất cả position).
+- [x] `prevent_initial_call=True` đảm bảo không trigger khi load lần đầu.
 
 **Bước kiểm tra:** Set filter hẹp (chọn 1 team, 1 continent). Click "Đặt lại" — filter phải trở về mặc định và chart reload đầy đủ data.
 
@@ -845,8 +845,8 @@ Cho Scatter chart (dòng ~379):
    và `customdata=df[f"{column}_pct"]` cho mỗi trace.
 
 **Tiêu chí chấp nhận:**
-- [ ] Hover vào điểm 1998 trên subplot Teams: hiện "Teams: 32, Thay đổi: +33.3%".
-- [ ] Điểm đầu tiên (1930): "Thay đổi: nan%" — xử lý bằng `fillna("")`.
+- [x] Hover vào điểm 1998 trên subplot Teams: hiện "Teams: 32, Thay đổi: +33.3%".
+- [x] Điểm đầu tiên (1930): "Thay đổi: nan%" — xử lý bằng `fillna("")`.
 
 **Bước kiểm tra:** Hover vào điểm 1998 trên Scale Chart — kiểm tra tooltip có dòng "Thay đổi".
 
@@ -875,20 +875,20 @@ Cho Scatter chart (dòng ~379):
 4. Test responsive: thu nhỏ cửa sổ xuống 1120px và 720px — kiểm tra layout không bị vỡ.
 
 **Tiêu chí chấp nhận — Checklist hoàn chỉnh:**
-- [ ] **CVD-FIX**: `POS_COLORS["Top 8"]` = `"#7c3aed"` (purple).
-- [ ] **CVD-FIX**: `COLOR_UPSET` = `"#f97316"` (orange).
-- [ ] **CVD-FIX**: `COLOR_HOME`/`COLOR_AWAY` = Blue/Orange.
-- [ ] **TITLES**: Tất cả chart titles ≤ 10 từ.
-- [ ] **INSIGHT QUA DESIGN**: Ít nhất 1 annotation lịch sử trên line charts.
-- [ ] **HIGHLIGHT**: Champion bar có màu nổi bật cho đội đứng đầu.
-- [ ] **DIAGONAL LINE**: Scatter tournament-scatter-chart có đường GF=GA.
-- [ ] **SORTING**: Goals Against chart sắp xếp ascending (ít GA ở trên).
-- [ ] **LEGEND**: Scatter upsets legend hiển thị "Upset — Đội yếu thắng".
-- [ ] **EMPTY STATE**: Tất cả charts có `empty_figure()` khi filter trả về rỗng.
-- [ ] **NO CRASH**: Không có callback exception nào.
-- [ ] **INSIGHT CARDS**: Cả 3 trang (Overview, Dominance, Upsets) có insight card.
-- [ ] **2022 PANEL**: Insight panel hiển thị khi chọn năm 2022.
-- [ ] **RESPONSIVE**: Layout đúng ở 1120px và 720px.
+- [x] **CVD-FIX**: `POS_COLORS["Top 8"]` = `"#7c3aed"` (purple).
+- [x] **CVD-FIX**: `COLOR_UPSET` = `"#f97316"` (orange).
+- [x] **CVD-FIX**: `COLOR_HOME`/`COLOR_AWAY` = Blue/Orange.
+- [x] **TITLES**: Tất cả chart titles ≤ 10 từ.
+- [x] **INSIGHT QUA DESIGN**: Ít nhất 1 annotation lịch sử trên line charts.
+- [x] **HIGHLIGHT**: Champion bar có màu nổi bật cho đội đứng đầu.
+- [x] **DIAGONAL LINE**: Scatter tournament-scatter-chart có đường GF=GA.
+- [x] **SORTING**: Goals Against chart sắp xếp ascending (ít GA ở trên).
+- [x] **LEGEND**: Scatter upsets legend hiển thị "Upset — Đội yếu thắng".
+- [x] **EMPTY STATE**: Tất cả charts có `empty_figure()` khi filter trả về rỗng.
+- [x] **NO CRASH**: Không có callback exception nào.
+- [x] **INSIGHT CARDS**: Cả 3 trang (Overview, Dominance, Upsets) có insight card.
+- [x] **2022 PANEL**: Insight panel hiển thị khi chọn năm 2022.
+- [x] **RESPONSIVE**: Layout đúng ở 1120px và 720px.
 
 **Bước kiểm tra:** Dùng checklist này như công cụ kiểm tra — đánh dấu từng mục sau khi xác nhận.
 
@@ -1034,32 +1034,32 @@ Cho Scatter chart (dòng ~379):
 ## 7. Definition of Done
 
 ### Kỹ thuật
-- [ ] `python app.py` chạy không lỗi trên Python 3.9+ với Dash 2.x.
-- [ ] Cả 4 trang render đúng, không có callback exception trong console.
-- [ ] Tất cả filter (RangeSlider, Dropdown, MatchType) hoạt động và cập nhật chart.
-- [ ] Click detail panel trong Upsets hoạt động (scatter + bar).
-- [ ] Trang Tournament hiển thị đúng khi thay đổi năm.
-- [ ] Layout responsive đúng ở 3 breakpoint: 1440px, 1120px, 720px.
+- [x] `python app.py` chạy không lỗi trên Python 3.9+ với Dash 2.x.
+- [x] Cả 4 trang render đúng, không có callback exception trong console.
+- [x] Tất cả filter (RangeSlider, Dropdown, MatchType) hoạt động và cập nhật chart.
+- [x] Click detail panel trong Upsets hoạt động (scatter + bar).
+- [x] Trang Tournament hiển thị đúng khi thay đổi năm.
+- [x] Layout responsive đúng ở 3 breakpoint: 1440px, 1120px, 720px.
 
 ### CVD Accessibility
-- [ ] Không có cặp màu đỏ (`#c44536`) + xanh lá (`#2f855a`) trong cùng một chart.
-- [ ] `POS_COLORS["Top 8"]` = `"#7c3aed"` (purple).
-- [ ] Upset scatter và neutral stacked bar dùng Blue-Orange scheme.
+- [x] Không có cặp màu đỏ (`#c44536`) + xanh lá (`#2f855a`) trong cùng một chart.
+- [x] `POS_COLORS["Top 8"]` = `"#7c3aed"` (purple).
+- [x] Upset scatter và neutral stacked bar dùng Blue-Orange scheme.
 
 ### Visualization Quality
-- [ ] Tất cả chart titles ≤ 10 từ, không có dấu chấm than hoặc câu hỏi dài.
-- [ ] Insight tự hiện ra qua: annotation trực tiếp trên chart (ít nhất 1 chart), highlight màu (champion bar), reference line (diagonal GF=GA), thứ tự sắp xếp (GA ascending).
-- [ ] Zero-baseline: tất cả bar charts có X/Y axis bắt đầu từ 0.
-- [ ] Tooltip có context "So What?" cho ít nhất 2 charts.
+- [x] Tất cả chart titles ≤ 10 từ, không có dấu chấm than hoặc câu hỏi dài.
+- [x] Insight tự hiện ra qua: annotation trực tiếp trên chart (ít nhất 1 chart), highlight màu (champion bar), reference line (diagonal GF=GA), thứ tự sắp xếp (GA ascending).
+- [x] Zero-baseline: tất cả bar charts có X/Y axis bắt đầu từ 0.
+- [x] Tooltip có context "So What?" cho ít nhất 2 charts.
 
 ### Storytelling
-- [ ] 3 trang (Overview, Dominance, Upsets) có `.insight-card` với nội dung đúng narrative arc.
-- [ ] Tournament 2022 hiển thị insight panel với 4 storylines.
-- [ ] Narrative arc 4 Act tự hiện qua visual: Mở rộng → Thống trị → Bất ngờ → Case Study.
+- [x] 3 trang (Overview, Dominance, Upsets) có `.insight-card` với nội dung đúng narrative arc.
+- [x] Tournament 2022 hiển thị insight panel với 4 storylines.
+- [x] Narrative arc 4 Act tự hiện qua visual: Mở rộng → Thống trị → Bất ngờ → Case Study.
 
 ### Báo cáo
 - [ ] 4 screenshots đã chụp, sẵn sàng cho báo cáo.
-- [ ] Mỗi quyết định thiết kế có thể giải thích theo framework Mackinlay (Position > Length > Area > Color) và nguyên tắc Chương 1–9.
+- [x] Mỗi quyết định thiết kế có thể giải thích theo framework Mackinlay (Position > Length > Area > Color) và nguyên tắc Chương 1–9.
 
 ---
 

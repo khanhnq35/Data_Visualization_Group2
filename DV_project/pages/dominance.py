@@ -4,7 +4,7 @@ import glob
 import os
 import pandas as pd
 import plotly.express as px
-from dash import dcc, html, dash_table, Input, Output
+from dash import dcc, html, dash_table, Input, Output, State, ctx
 
 from src.components import graph_card, kpi_card, page_header
 from src.theme import COLORS, apply_chart_layout, empty_figure
@@ -140,21 +140,13 @@ def layout() -> html.Div:
                 "Explore historical World Cup dominance patterns by teams and continents.",
             ),
             html.Div(
-                className="insight-card",
-                children=[
-                    html.Strong("Chỉ 9 đội chia nhau 22 chức vô địch."),
-                    " Châu Âu 12 danh hiệu, Nam Mỹ 10. Phần còn lại của thế giới: ",
-                    html.Strong("0"), ". Sự mở rộng là thật, nhưng quyền lực vẫn đứng yên."
-                ],
-            ),
-            html.Div(
                 className="filter-panel",
-                style={"gridTemplateColumns": "minmax(280px, 1.4fr) repeat(3, minmax(160px, 0.7fr))"},
+                style={"gridTemplateColumns": "minmax(280px, 1.4fr) repeat(3, minmax(160px, 0.7fr)) auto"},
                 children=[
                     html.Div(
                         className="filter-block",
                         children=[
-                            html.Label("Year range", htmlFor="dominance-year-range"),
+                            html.Label("Year range: 1930 – 2022", id="dominance-year-range-label", htmlFor="dominance-year-range"),
                             dcc.RangeSlider(
                                 id="dominance-year-range",
                                 min=min(AVAILABLE_YEARS),
@@ -163,7 +155,7 @@ def layout() -> html.Div:
                                 marks=YEAR_SLIDER_MARKS,
                                 value=[min(AVAILABLE_YEARS), max(AVAILABLE_YEARS)],
                                 allowCross=False,
-                                tooltip={"placement": "bottom", "always_visible": False},
+                                updatemode="mouseup",
                             ),
                         ],
                     ),
@@ -203,6 +195,47 @@ def layout() -> html.Div:
                                 value=POSITION_OPTIONS,
                                 multi=True,
                                 placeholder="All groups",
+                            ),
+                        ],
+                    ),
+                    html.Div(
+                        className="filter-block",
+                        style={"justifyContent": "end", "height": "100%", "display": "flex", "flexDirection": "column"},
+                        children=[
+                            html.Label("Action", style={"visibility": "hidden"}),
+                            html.Div(
+                                style={"display": "flex", "flexDirection": "row", "gap": "8px", "alignItems": "center", "height": "38px"},
+                                children=[
+                                    html.Button(
+                                        "Áp dụng",
+                                        id="dominance-apply-btn",
+                                        style={
+                                            "padding": "8px 16px",
+                                            "background": "var(--accent)",
+                                            "color": "white",
+                                            "border": "none",
+                                            "borderRadius": "6px",
+                                            "cursor": "pointer",
+                                            "fontSize": "13px",
+                                            "fontWeight": "600",
+                                            "height": "38px"
+                                        },
+                                    ),
+                                    html.Button(
+                                        "Đặt lại",
+                                        id="dominance-reset-btn",
+                                        style={
+                                            "padding": "8px 16px",
+                                            "background": "var(--surface-alt)",
+                                            "border": "1px solid var(--border)",
+                                            "borderRadius": "6px",
+                                            "cursor": "pointer",
+                                            "fontSize": "13px",
+                                            "color": "var(--muted)",
+                                            "height": "38px"
+                                        },
+                                    ),
+                                ]
                             ),
                         ],
                     ),
@@ -284,6 +317,25 @@ def layout() -> html.Div:
 
 def register_callbacks(app) -> None:
     @app.callback(
+        Output("dominance-year-range", "value"),
+        Output("dominance-team-filter", "value"),
+        Output("dominance-continent-filter", "value"),
+        Output("dominance-position-filter", "value"),
+        Input("dominance-reset-btn", "n_clicks"),
+        prevent_initial_call=True,
+    )
+    def reset_dominance_filters(n_clicks):
+        return [min(AVAILABLE_YEARS), max(AVAILABLE_YEARS)], [], CONTINENT_OPTIONS, POSITION_OPTIONS
+
+    @app.callback(
+        Output("dominance-year-range-label", "children"),
+        Input("dominance-year-range", "value"),
+    )
+    def update_dominance_label(year_range):
+        y_min, y_max = (year_range[0], year_range[1]) if year_range and len(year_range) == 2 else (1930, 2022)
+        return f"Year range: {y_min} – {y_max}"
+
+    @app.callback(
         Output("dominance-kpi-tournaments", "children"),
         Output("dominance-kpi-teams", "children"),
         Output("dominance-kpi-titles", "children"),
@@ -292,17 +344,27 @@ def register_callbacks(app) -> None:
         Output("dominance-top4-by-continent", "figure"),
         Output("dominance-goals-for-chart", "figure"),
         Output("dominance-summary-table", "data"),
-        Input("dominance-year-range", "value"),
-        Input("dominance-team-filter", "value"),
-        Input("dominance-continent-filter", "value"),
-        Input("dominance-position-filter", "value"),
+        Input("dominance-apply-btn", "n_clicks"),
+        Input("dominance-reset-btn", "n_clicks"),
+        State("dominance-year-range", "value"),
+        State("dominance-team-filter", "value"),
+        State("dominance-continent-filter", "value"),
+        State("dominance-position-filter", "value"),
     )
-    def update_dominance(year_range, selected_teams, selected_continents, selected_positions):
+    def update_dominance(apply_clicks, reset_clicks, year_range, selected_teams, selected_continents, selected_positions):
+        if ctx.triggered_id == "dominance-reset-btn":
+            year_range = [min(AVAILABLE_YEARS), max(AVAILABLE_YEARS)]
+            selected_teams = []
+            selected_continents = CONTINENT_OPTIONS
+            selected_positions = POSITION_OPTIONS
+
         if not selected_continents:
             selected_continents = CONTINENT_OPTIONS
         if not selected_positions:
             selected_positions = POSITION_OPTIONS
 
+        if not year_range or len(year_range) != 2:
+            year_range = [min(AVAILABLE_YEARS), max(AVAILABLE_YEARS)]
         year_min, year_max = year_range
         filtered = ALL_STANDINGS[
             (ALL_STANDINGS["Year"] >= year_min)
@@ -355,13 +417,15 @@ def register_callbacks(app) -> None:
                 yaxis={"automargin": True, "title": None},
                 xaxis={"dtick": 1, "tick0": 0, "title": "Số lần vô địch"},
             )
-            # Annotation trực tiếp bên phải bar đội nhiều nhất
-            champion_fig.add_annotation(
-                x=max_titles, y=max_team,
-                text=f"{max_titles} lần",
-                showarrow=False, xanchor="left", xshift=6,
-                font={"size": 12, "color": COLORS["accent_2"]},
-            )
+
+        CONTINENT_COLORS = {
+            "Europe":        "#1d4ed8",  # Royal Blue
+            "South America": "#d98324",  # Amber/Orange
+            "Asia":          "#8a7a1f",  # Gold/Olive
+            "Africa":        "#2f855a",  # Green
+            "North America": "#7c3aed",  # Purple
+            "Oceania":       "#007c89",  # Teal
+        }
 
         top4_by_continent = (
             filtered[filtered["Position"] <= 4]
@@ -380,6 +444,7 @@ def register_callbacks(app) -> None:
                 color="continent",
                 title="Số suất Top 4 theo châu lục qua các kỳ",
                 labels={"top4_count": "Số suất Top 4", "continent": "Châu lục"},
+                color_discrete_map=CONTINENT_COLORS,
             )
             apply_chart_layout(top4_fig, height=380)
             top4_fig.update_layout(
@@ -397,11 +462,6 @@ def register_callbacks(app) -> None:
                     x0=x0, x1=x1,
                     fillcolor="#f0f4f8", opacity=0.25,
                     layer="below", line_width=0,
-                )
-                top4_fig.add_annotation(
-                    x=x_label, y=4.3, text=label,
-                    showarrow=False,
-                    font={"size": 9, "color": COLORS["muted"]},
                 )
 
         goals_by_team = (
