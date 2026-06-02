@@ -1,15 +1,17 @@
+# -*- coding: utf-8 -*-
 from __future__ import annotations
 
 import glob
 import os
-import pandas as pd
-from dash import dcc, html, dash_table, Input, Output
 
-from src.components import graph_card, kpi_card, page_header
+import pandas as pd
+import plotly.express as px
+from dash import Input, Output, dash_table, dcc, html
+
+from src.components import page_header
 from src.theme import COLORS, apply_chart_layout, empty_figure
 
-
-# ── Data Loading & Processing ──────────────────────────────────────────────────
+# ── Data loading ───────────────────────────────────────────────────────────────
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), "..", "Data", "archive")
 
@@ -28,7 +30,7 @@ AVAILABLE_YEARS = sorted(
 _cache: dict = {}
 
 
-def load_year(year: int) -> pd.DataFrame:
+def _load_year(year: int) -> pd.DataFrame:
     if year in _cache:
         return _cache[year]
     path = os.path.join(DATA_DIR, f"FIFA - {year}.csv")
@@ -56,20 +58,103 @@ def _pos_group(pos):
     return "Other"
 
 
-# Colour map shared across charts
 POS_COLORS = {
-    "Champion": "#facc15",  # Tailwind yellow-400 (corresponds to gold)
-    "Top 4": "#94a3b8",     # Tailwind slate-400 (corresponds to silver)
-    "Top 8": "#d97706",     # Tailwind amber-600 (corresponds to bronze)
-    "Other": "#cbd5e1",     # Light gray
+    "Champion": COLORS["accent_2"],
+    "Top 4":    COLORS["accent"],
+    "Top 8":    COLORS["success"],
+    "Other":    COLORS["muted"],
 }
 
-CHART_LAYOUT = dict(
-    hovermode="closest",
-)
+# Flag emoji + short label for chart axes
+TEAM_LABEL: dict[str, str] = {
+    "Argentina":     "ARG",
+    "France":        "FRA",
+    "Croatia":       "CRO",
+    "Morocco":       "MAR",
+    "England":       "ENG",
+    "Netherlands":   "NED",
+    "Portugal":      "POR",
+    "Brazil":        "BRA",
+    "Japan":         "JPN",
+    "Senegal":       "SEN",
+    "Australia":     "AUS",
+    "Switzerland":   "SUI",
+    "USA":           "USA",
+    "Spain":         "ESP",
+    "Poland":        "POL",
+    "South Korea":   "KOR",
+    "Germany":       "GER",
+    "Ecuador":       "ECU",
+    "Cameroon":      "CMR",
+    "Uruguay":       "URU",
+    "Tunisia":       "TUN",
+    "Mexico":        "MEX",
+    "Belgium":       "BEL",
+    "Ghana":         "GHA",
+    "Saudi Arabia":  "KSA",
+    "Iran":          "IRN",
+    "Costa Rica":    "CRC",
+    "Denmark":       "DEN",
+    "Serbia":        "SRB",
+    "Wales":         "WAL",
+    "Canada":        "CAN",
+    "Qatar":         "QAT",
+    "Italy":         "ITA",
+    "West Germany":  "WGR",
+    "Hungary":       "HUN",
+    "Sweden":        "SWE",
+    "Austria":       "AUT",
+    "Czechoslovakia":"TCH",
+    "Chile":         "CHI",
+    "Yugoslavia":    "YUG",
+    "United States": "USA",
+    "Soviet Union":  "URS",
+    "Turkey":        "TUR",
+    "Bulgaria":      "BUL",
+    "Romania":       "ROU",
+    "Paraguay":      "PAR",
+    "Bolivia":       "BOL",
+    "Peru":          "PER",
+    "Colombia":      "COL",
+    "Russia":        "RUS",
+    "Slovakia":      "SVK",
+    "Greece":        "GRE",
+    "Algeria":       "ALG",
+    "Nigeria":       "NGA",
+    "Honduras":      "HON",
+    "New Zealand":   "NZL",
+    "Ivory Coast":   "CIV",
+    "North Korea":   "PRK",
+    "Serbia and Montenegro": "SCG",
+    "FR Yugoslavia": "YUG",
+    "Dutch East Indies": "DEI",
+    "East Germany":  "GDR",
+    "Israel":        "ISR",
+    "El Salvador":   "SLV",
+    "Haiti":         "HAI",
+    "Cuba":          "CUB",
+    "Norway":        "NOR",
+    "Scotland":      "SCO",
+    "Northern Ireland": "NIR",
+    "Republic of Ireland": "IRL",
+    "Kuwait":        "KUW",
+    "Cameroon":      "CMR",
+    "Egypt":         "EGY",
+    "South Africa":  "RSA",
+    "Togo":          "TOG",
+    "Angola":        "ANG",
+    "Slovenia":      "SVN",
+    "Trinidad and Tobago": "TRI",
+    "Ukraine":       "UKR",
+    "Czech Republic":"CZE",
+}
 
 
-# ── Page Layout ────────────────────────────────────────────────────────────────
+def _short(team: str) -> str:
+    return TEAM_LABEL.get(team, team)
+
+# ── Layout ─────────────────────────────────────────────────────────────────────
+
 
 def layout() -> html.Div:
     return html.Div(
@@ -78,11 +163,12 @@ def layout() -> html.Div:
             page_header(
                 "Tournament Detail",
                 "FIFA World Cup",
-                "Explore team performance, standing tables, and goal profiles for any World Cup edition.",
+                "Explore team performance, standings, and goal profiles for any World Cup edition.",
             ),
+            # Year filter
             html.Div(
                 className="filter-panel",
-                style={"gridTemplateColumns": "180px", "justifyContent": "start"},
+                style={"gridTemplateColumns": "200px"},
                 children=[
                     html.Div(
                         className="filter-block",
@@ -98,40 +184,49 @@ def layout() -> html.Div:
                     ),
                 ],
             ),
-            # Top-4 highlight cards (populated via callback)
+            # Top-4 KPI cards
             html.Div(
                 id="tournament-top4-cards",
                 className="kpi-grid",
                 style={"gridTemplateColumns": "repeat(4, minmax(140px, 1fr))"},
             ),
-            # Tournament metadata summary (populated via callback)
+            # Meta strip
             html.Div(
                 className="kpi-grid",
                 style={"gridTemplateColumns": "repeat(5, minmax(120px, 1fr))"},
                 children=[
-                    kpi_card("Host Country", "tournament-meta-host"),
-                    kpi_card("Teams Entered", "tournament-meta-teams"),
-                    kpi_card("Matches Played", "tournament-meta-matches"),
-                    kpi_card("Total Goals", "tournament-meta-goals"),
-                    kpi_card("Avg Goals / Match", "tournament-meta-avg-goals"),
+                    _kpi_card("Host Country",      "tournament-meta-host"),
+                    _kpi_card("Teams",             "tournament-meta-teams"),
+                    _kpi_card("Matches Played",    "tournament-meta-matches"),
+                    _kpi_card("Total Goals",       "tournament-meta-goals"),
+                    _kpi_card("Avg Goals / Match", "tournament-meta-avg"),
                 ],
             ),
-            # Goals charts row
+            # Goals charts
             html.Div(
                 className="chart-grid two-column",
                 children=[
-                    graph_card("tournament-goals-for-chart"),
-                    graph_card("tournament-goals-against-chart"),
+                    html.Div(className="chart-card", style={"minHeight": "360px"},
+                             children=dcc.Graph(id="tournament-goals-for-chart",
+                                                config={"displayModeBar": False, "responsive": True},
+                                                style={"height": "100%", "minHeight": "360px"})),
+                    html.Div(className="chart-card", style={"minHeight": "360px"},
+                             children=dcc.Graph(id="tournament-goals-against-chart",
+                                                config={"displayModeBar": False, "responsive": True},
+                                                style={"height": "100%", "minHeight": "360px"})),
                 ],
             ),
-            # Scatter plot row
+            # Scatter
             html.Div(
                 className="chart-grid single-column",
                 children=[
-                    graph_card("tournament-scatter-chart", "chart-wide"),
+                    html.Div(className="chart-card chart-wide", style={"minHeight": "460px"},
+                             children=dcc.Graph(id="tournament-scatter-chart",
+                                                config={"displayModeBar": False, "responsive": True},
+                                                style={"height": "100%", "minHeight": "460px"})),
                 ],
             ),
-            # Standings table card
+            # Standings table
             html.Div(
                 className="chart-card",
                 style={"padding": "24px"},
@@ -140,18 +235,29 @@ def layout() -> html.Div:
                     html.Div(id="tournament-ranking-table"),
                 ],
             ),
-            # 2022 specific insights (populated via callback)
+            # 2022 insight panel
             html.Div(id="tournament-insight-panel"),
         ],
     )
 
 
-# ── Helper Card Builder ────────────────────────────────────────────────────────
+# ── Small helpers ──────────────────────────────────────────────────────────────
 
-def _card(rank_label: str, team: str, detail: str, color: str) -> html.Div:
+
+def _kpi_card(label: str, value_id: str) -> html.Div:
     return html.Div(
         className="kpi-card",
-        style={"borderLeft": f"4px solid {color}", "padding": "18px"},
+        children=[
+            html.Div(label, className="kpi-label"),
+            html.Div(id=value_id, className="kpi-value"),
+        ],
+    )
+
+
+def _rank_card(rank_label: str, team: str, detail: str, accent: str) -> html.Div:
+    return html.Div(
+        className="kpi-card",
+        style={"borderLeft": f"4px solid {accent}"},
         children=[
             html.Div(rank_label, className="kpi-label"),
             html.Div(team, className="kpi-value", style={"fontSize": "22px", "marginTop": "8px"}),
@@ -160,182 +266,136 @@ def _card(rank_label: str, team: str, detail: str, color: str) -> html.Div:
     )
 
 
-def _build_insight_panel(year: int, df: pd.DataFrame) -> html.Div:
-    if year != 2022:
-        return html.Div()
+# ── Callbacks ──────────────────────────────────────────────────────────────────
 
-    insights = [
-        {
-            "team": "Argentina 🇦🇷",
-            "color": "#3b82f6",
-            "text": "Argentina claimed their third title, ending a 36-year wait. Messi led the tournament with 7 goals and 3 assists, finally completing international football's greatest individual narrative.",
-        },
-        {
-            "team": "France 🇫🇷",
-            "color": "#ef4444",
-            "text": "The defending champions were fierce to the end — Mbappé's hat-trick in the final made it the most dramatic World Cup final in history. France's 16 goals was the joint-highest of any team.",
-        },
-        {
-            "team": "Croatia 🇭🇷",
-            "color": "#8b5cf6",
-            "text": "Croatia confirmed their status as tournament stalwarts, claiming 3rd place for the second time in four editions. Solid defensive organisation and Modrić's midfield vision were key.",
-        },
-        {
-            "team": "Morocco 🇲🇦",
-            "color": "#10b981",
-            "text": "The tournament's great story: Morocco became the first African and Arab nation to reach a World Cup semi-final, beating Spain and Portugal on the way.",
-        },
-    ]
-
-    cards = []
-    for ins in insights:
-        cards.append(
-            html.Div(
-                className="chart-card",
-                style={
-                    "borderLeft": f"4px solid {ins['color']}",
-                    "padding": "16px 20px",
-                    "flex": "1",
-                    "minWidth": "220px",
-                },
-                children=[
-                    html.Div(ins["team"], style={"fontWeight": "700", "fontSize": "15px", "marginBottom": "8px", "color": COLORS["text"]}),
-                    html.P(ins["text"], style={"fontSize": "13px", "color": COLORS["muted"], "margin": 0, "lineHeight": "1.5"}),
-                ],
-            )
-        )
-
-    return html.Div(
-        style={"marginTop": "24px"},
-        children=[
-            html.H3(
-                "2022 World Cup Analysis & Insights",
-                style={"fontSize": "18px", "fontWeight": "750", "color": COLORS["text"], "marginBottom": "16px"},
-            ),
-            html.Div(style={"display": "flex", "gap": "16px", "flexWrap": "wrap"}, children=cards),
-        ],
-    )
-
-
-# ── Callbacks Registration ─────────────────────────────────────────────────────
 
 def register_callbacks(app) -> None:
     @app.callback(
-        Output("tournament-top4-cards", "children"),
-        Output("tournament-meta-host", "children"),
-        Output("tournament-meta-teams", "children"),
-        Output("tournament-meta-matches", "children"),
-        Output("tournament-meta-goals", "children"),
-        Output("tournament-meta-avg-goals", "children"),
-        Output("tournament-goals-for-chart", "figure"),
+        Output("tournament-top4-cards",      "children"),
+        Output("tournament-meta-host",       "children"),
+        Output("tournament-meta-teams",      "children"),
+        Output("tournament-meta-matches",    "children"),
+        Output("tournament-meta-goals",      "children"),
+        Output("tournament-meta-avg",        "children"),
+        Output("tournament-goals-for-chart",     "figure"),
         Output("tournament-goals-against-chart", "figure"),
-        Output("tournament-scatter-chart", "figure"),
-        Output("tournament-ranking-table", "children"),
-        Output("tournament-insight-panel", "children"),
+        Output("tournament-scatter-chart",       "figure"),
+        Output("tournament-ranking-table",       "children"),
+        Output("tournament-insight-panel",       "children"),
         Input("tournament-year-dropdown", "value"),
     )
     def update_all(year: int):
-        df = load_year(year)
+        df = _load_year(year)
         df_sorted = df.sort_values("Position").reset_index(drop=True)
-
-        # Summary row for this year
         meta = summary_df[summary_df["YEAR"] == year]
 
-        # ── Top-4 cards ──────────────────────────────────────────────────────────
-        top4 = df_sorted[df_sorted["Position"] <= 4].copy()
-        card_colors = ["#facc15", "#94a3b8", "#d97706", "#64727d"]
-        rank_labels = ["🏆 Champion", "Runner-Up", "3rd Place", "4th Place"]
+        # ── Top-4 cards ───────────────────────────────────────────────────────
+        top4 = df_sorted[df_sorted["Position"] <= 4]
+        accents = ["#d98324", "#64727d", "#b45309", "#94a3b8"]
+        labels  = ["\U0001f3c6 Champion", "Runner-Up", "3rd Place", "4th Place"]
         cards = []
         for i, (_, row) in enumerate(top4.iterrows()):
             if i >= 4:
                 break
-            gf = int(row.get("Goals For", 0)) if pd.notna(row.get("Goals For")) else 0
-            ga = int(row.get("Goals Against", 0)) if pd.notna(row.get("Goals Against")) else 0
+            gf = int(row["Goals For"])  if pd.notna(row.get("Goals For"))     else 0
+            ga = int(row["Goals Against"]) if pd.notna(row.get("Goals Against")) else 0
             detail = f"{int(row['Games Played'])} games · {gf} GF · {ga} GA"
-            cards.append(_card(rank_labels[i], row["Team"], detail, card_colors[i]))
+            cards.append(_rank_card(labels[i], row["Team"], detail, accents[i]))
 
-        top4_section = cards
-
-        # ── Meta values ──────────────────────────────────────────────────────────
-        host, teams, matches, goals, avg = "-", "-", "-", "-", "-"
+        # ── Meta values ───────────────────────────────────────────────────────
+        host = teams = matches = goals = avg = "—"
         if not meta.empty:
             m = meta.iloc[0]
-            host = str(m["HOST"])
-            teams = str(int(m["TEAMS"]))
+            host    = str(m["HOST"])
+            teams   = str(int(m["TEAMS"]))
             matches = str(int(m["MATCHES PLAYED"]))
-            goals = str(int(m["GOALS SCORED"]))
-            avg = f"{float(m['AVG GOALS PER GAME']):.2f}"
+            goals   = str(int(m["GOALS SCORED"]))
+            avg     = f"{float(m['AVG GOALS PER GAME']):.2f}"
 
-        # ── Goals For chart ──────────────────────────────────────────────────────
+        # ── Goals For chart ───────────────────────────────────────────────────
         gf_df = df_sorted[["Team", "Goals For", "position_group"]].copy()
-        gf_df = gf_df[pd.to_numeric(gf_df["Goals For"], errors="coerce").notna()]
-        gf_df["Goals For"] = pd.to_numeric(gf_df["Goals For"])
-        fig_gf = px.bar(
-            gf_df.sort_values("Goals For", ascending=True),
-            x="Goals For",
-            y="Team",
-            color="position_group",
-            color_discrete_map=POS_COLORS,
-            orientation="h",
-            title=f"Goals Scored — {year}",
-            labels={"Goals For": "Goals For", "position_group": "Standing Group"},
-        )
-        apply_chart_layout(fig_gf, height=380)
-        fig_gf.update_layout(**CHART_LAYOUT)
-        fig_gf.update_traces(hovertemplate="%{y}<br>Goals: %{x}<extra></extra>")
+        gf_df["Goals For"] = pd.to_numeric(gf_df["Goals For"], errors="coerce")
+        gf_df = gf_df.dropna(subset=["Goals For"]).sort_values("Goals For", ascending=True)
+        gf_df["Label"] = gf_df["Team"].map(_short)
+        if gf_df.empty:
+            fig_gf = empty_figure(f"Goals Scored — {year}")
+        else:
+            fig_gf = px.bar(
+                gf_df, x="Goals For", y="Label", orientation="h",
+                color="position_group", color_discrete_map=POS_COLORS,
+                title=f"Goals Scored — {year}",
+                labels={"Goals For": "Goals", "Label": "", "position_group": "Group"},
+                custom_data=["Team"],
+            )
+            apply_chart_layout(fig_gf, height=max(360, len(gf_df) * 22))
+            fig_gf.update_layout(
+                margin={"l": 60, "r": 24, "t": 48, "b": 10},
+                legend={"orientation": "h", "yanchor": "bottom", "y": -0.08, "xanchor": "left", "x": 0},
+            )
+            fig_gf.update_traces(hovertemplate="%{customdata[0]}<br>Goals: %{x}<extra></extra>")
 
-        # ── Goals Against chart ──────────────────────────────────────────────────
+        # ── Goals Against chart ───────────────────────────────────────────────
         ga_df = df_sorted[["Team", "Goals Against", "position_group"]].copy()
-        ga_df = ga_df[pd.to_numeric(ga_df["Goals Against"], errors="coerce").notna()]
-        ga_df["Goals Against"] = pd.to_numeric(ga_df["Goals Against"])
-        fig_ga = px.bar(
-            ga_df.sort_values("Goals Against", ascending=False),
-            x="Goals Against",
-            y="Team",
-            color="position_group",
-            color_discrete_map=POS_COLORS,
-            orientation="h",
-            title=f"Goals Conceded — {year}",
-            labels={"Goals Against": "Goals Conceded", "position_group": "Standing Group"},
-        )
-        apply_chart_layout(fig_ga, height=380)
-        fig_ga.update_layout(**CHART_LAYOUT)
-        fig_ga.update_traces(hovertemplate="%{y}<br>Conceded: %{x}<extra></extra>")
+        ga_df["Goals Against"] = pd.to_numeric(ga_df["Goals Against"], errors="coerce")
+        ga_df = ga_df.dropna(subset=["Goals Against"]).sort_values("Goals Against", ascending=False)
+        ga_df["Label"] = ga_df["Team"].map(_short)
+        if ga_df.empty:
+            fig_ga = empty_figure(f"Goals Conceded — {year}")
+        else:
+            fig_ga = px.bar(
+                ga_df, x="Goals Against", y="Label", orientation="h",
+                color="position_group", color_discrete_map=POS_COLORS,
+                title=f"Goals Conceded — {year}",
+                labels={"Goals Against": "Conceded", "Label": "", "position_group": "Group"},
+                custom_data=["Team"],
+            )
+            apply_chart_layout(fig_ga, height=max(360, len(ga_df) * 22))
+            fig_ga.update_layout(
+                margin={"l": 60, "r": 24, "t": 48, "b": 10},
+                legend={"orientation": "h", "yanchor": "bottom", "y": -0.08, "xanchor": "left", "x": 0},
+            )
+            fig_ga.update_traces(hovertemplate="%{customdata[0]}<br>Conceded: %{x}<extra></extra>")
 
-        # ── Scatter plot ─────────────────────────────────────────────────────────
+        # ── Scatter ───────────────────────────────────────────────────────────
         sc_df = df_sorted[["Team", "Goals For", "Goals Against", "position_group", "Points", "Games Played"]].copy()
         for col in ["Goals For", "Goals Against", "Points"]:
             sc_df[col] = pd.to_numeric(sc_df[col], errors="coerce")
         sc_df = sc_df.dropna(subset=["Goals For", "Goals Against"])
-
-        fig_sc = px.scatter(
-            sc_df,
-            x="Goals For",
-            y="Goals Against",
-            color="position_group",
-            color_discrete_map=POS_COLORS,
-            text="Team",
-            size="Points",
-            size_max=24,
-            title=f"Goals Scored vs. Goals Conceded — {year}",
-            labels={"position_group": "Standing Group"},
-            hover_data={"Points": True, "Games Played": True},
+        sc_df["Label"] = sc_df["Team"].map(_short)
+        # only label top 8 to avoid overlap
+        sc_df["DisplayLabel"] = sc_df.apply(
+            lambda r: r["Label"] if r["position_group"] in ("Champion", "Top 4", "Top 8") else "", axis=1
         )
-        apply_chart_layout(fig_sc, height=450)
-        fig_sc.update_traces(
-            textposition="top center",
-            textfont_size=10,
-            hovertemplate="<b>%{text}</b><br>GF: %{x}  GA: %{y}<br>Points: %{customdata[0]}<extra></extra>",
-        )
-        fig_sc.update_layout(**CHART_LAYOUT)
-        fig_sc.update_layout(yaxis_autorange="reversed")  # Fewer conceded goals at the top is better!
+        if sc_df.empty:
+            fig_sc = empty_figure(f"Goals Scored vs Conceded — {year}")
+        else:
+            fig_sc = px.scatter(
+                sc_df, x="Goals For", y="Goals Against",
+                color="position_group", color_discrete_map=POS_COLORS,
+                text="DisplayLabel", size="Points", size_max=28,
+                title=f"Goals Scored vs Goals Conceded — {year}",
+                labels={"position_group": "Group"},
+                custom_data=["Team", "Points", "Games Played", "Label"],
+            )
+            apply_chart_layout(fig_sc, height=500)
+            fig_sc.update_layout(
+                yaxis_autorange="reversed",
+                margin={"l": 48, "r": 48, "t": 56, "b": 48},
+                legend={"orientation": "h", "yanchor": "bottom", "y": 1.02, "xanchor": "right", "x": 1},
+            )
+            fig_sc.update_traces(
+                textposition="top center",
+                textfont_size=10,
+                cliponaxis=False,
+                hovertemplate="<b>%{customdata[0]}</b> (%{customdata[3]})<br>GF: %{x}  GA: %{y}<br>Points: %{customdata[1]}<extra></extra>",
+            )
 
-        # ── Ranking table ────────────────────────────────────────────────────────
-        display_cols = ["Position", "Team", "Games Played", "Win", "Draw", "Loss", "Goals For", "Goals Against", "Goal Difference", "Points"]
+        # ── Standings table ───────────────────────────────────────────────────
+        display_cols = ["Position", "Team", "Games Played", "Win", "Draw", "Loss",
+                        "Goals For", "Goals Against", "Goal Difference", "Points"]
         tbl_cols = [c for c in display_cols if c in df_sorted.columns]
         tbl_df = df_sorted[tbl_cols].copy()
         tbl_df["Position"] = tbl_df["Position"].apply(lambda x: int(x) if pd.notna(x) else "")
-
         table = dash_table.DataTable(
             id="tournament-data-table",
             data=tbl_df.to_dict("records"),
@@ -344,27 +404,87 @@ def register_callbacks(app) -> None:
             style_table={"overflowX": "auto"},
             style_header={
                 "backgroundColor": "#f6f8fb",
-                "color": "#172026",
+                "color": COLORS["text"],
                 "fontWeight": "600",
                 "fontSize": "12px",
-                "border": "1px solid #d8e0e6",
+                "border": f"1px solid {COLORS['border']}",
                 "textTransform": "uppercase",
                 "letterSpacing": "0.03em",
             },
             style_data={
-                "backgroundColor": "#ffffff",
-                "color": "#172026",
+                "backgroundColor": COLORS["surface"],
+                "color": COLORS["text"],
                 "fontSize": "13px",
-                "border": "1px solid #d8e0e6",
+                "border": f"1px solid {COLORS['border']}",
             },
             style_data_conditional=[
                 {"if": {"row_index": "odd"}, "backgroundColor": "#f8fafc"},
-                {"if": {"filter_query": "{Position} = 1"}, "color": COLORS["accent_2"], "fontWeight": "700"},
+                {"if": {"filter_query": "{Position} = 1"},
+                 "color": COLORS["accent_2"], "fontWeight": "700"},
             ],
             page_size=20,
         )
 
-        # ── Insight panel (only for 2022) ────────────────────────────────────────
-        insight_panel = _build_insight_panel(year, df_sorted)
+        # ── Insight panel (2022 only) ─────────────────────────────────────────
+        insight = _build_insight_panel(year)
 
-        return top4_section, host, teams, matches, goals, avg, fig_gf, fig_ga, fig_sc, table, insight_panel
+        return cards, host, teams, matches, goals, avg, fig_gf, fig_ga, fig_sc, table, insight
+
+
+# ── 2022 insight panel ─────────────────────────────────────────────────────────
+
+
+def _build_insight_panel(year: int) -> html.Div:
+    if year != 2022:
+        return html.Div()
+
+    insights = [
+        {
+            "team": "Argentina \U0001f1e6\U0001f1f7",
+            "color": COLORS["accent_2"],
+            "text": "Argentina claimed their third title, ending a 36-year wait. Messi led the tournament with 7 goals and 3 assists, finally completing international football's greatest individual narrative.",
+        },
+        {
+            "team": "France \U0001f1eb\U0001f1f7",
+            "color": COLORS["accent_3"],
+            "text": "The defending champions were fierce to the end — Mbappe's hat-trick in the final made it the most dramatic World Cup final in history. France's 16 goals was the joint-highest of any team.",
+        },
+        {
+            "team": "Croatia \U0001f1ed\U0001f1f7",
+            "color": COLORS["accent"],
+            "text": "Croatia confirmed their status as tournament stalwarts, claiming 3rd place for the second time in four editions. Solid defensive organisation and Modric's midfield vision were key.",
+        },
+        {
+            "team": "Morocco \U0001f1f2\U0001f1e6",
+            "color": COLORS["success"],
+            "text": "The tournament's great story: Morocco became the first African and Arab nation to reach a World Cup semi-final, beating Spain and Portugal on the way.",
+        },
+    ]
+
+    cards = [
+        html.Div(
+            className="chart-card",
+            style={
+                "borderLeft": f"4px solid {ins['color']}",
+                "padding": "16px 20px",
+                "flex": "1",
+                "minWidth": "220px",
+            },
+            children=[
+                html.Div(ins["team"], style={"fontWeight": "700", "fontSize": "15px",
+                                             "marginBottom": "8px", "color": COLORS["text"]}),
+                html.P(ins["text"], style={"fontSize": "13px", "color": COLORS["muted"],
+                                           "margin": 0, "lineHeight": "1.6"}),
+            ],
+        )
+        for ins in insights
+    ]
+
+    return html.Div(
+        children=[
+            html.H3("2022 World Cup — Key Storylines",
+                    style={"fontSize": "18px", "fontWeight": "700",
+                           "color": COLORS["text"], "marginBottom": "16px"}),
+            html.Div(style={"display": "flex", "gap": "16px", "flexWrap": "wrap"}, children=cards),
+        ],
+    )
