@@ -15,7 +15,7 @@ app.layout = html.Div(
         # Simple top nav
         html.Nav(
             style={
-                "backgroundColor": "#1e293b",
+                "backgroundColor": "#111827",
                 "padding": "12px 24px",
                 "display": "flex",
                 "gap": "24px",
@@ -23,11 +23,11 @@ app.layout = html.Div(
                 "borderBottom": "1px solid #334155",
             },
             children=[
-                html.Span("⚽ FIFA World Cup Dashboard", style={"color": "#f1f5f9", "fontWeight": "700", "fontSize": "16px", "marginRight": "16px"}),
-                dcc.Link("Overview",        href="/",                   style={"color": "#94a3b8", "textDecoration": "none", "fontSize": "14px"}),
-                dcc.Link("Dominance",       href="/dominance",          style={"color": "#94a3b8", "textDecoration": "none", "fontSize": "14px"}),
-                dcc.Link("Upsets",          href="/upsets",             style={"color": "#94a3b8", "textDecoration": "none", "fontSize": "14px"}),
-                dcc.Link("Tournament Detail", href="/tournament-detail", style={"color": "#f1f5f9", "textDecoration": "none", "fontSize": "14px", "fontWeight": "600"}),
+                html.Span("⚽ FIFA World Cup Dashboard", style={"color": "#f8fafc", "fontWeight": "700", "fontSize": "16px", "marginRight": "16px"}),
+                dcc.Link("Overview",        href="/",                   style={"color": "#cbd5e1", "textDecoration": "none", "fontSize": "14px"}),
+                dcc.Link("Dominance",       href="/dominance",          style={"color": "#cbd5e1", "textDecoration": "none", "fontSize": "14px"}),
+                dcc.Link("Upsets",          href="/upsets",             style={"color": "#cbd5e1", "textDecoration": "none", "fontSize": "14px"}),
+                dcc.Link("Tournament Detail", href="/tournament-detail", style={"color": "#f1f5f9", "textDecoration": "none", "fontSize": "14px"}),
             ],
         ),
         dash.page_container,
