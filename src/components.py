@@ -27,7 +27,7 @@ def kpi_card(label: str, value_id: str, helper_id: str | None = None) -> html.Di
     return html.Div(className="kpi-card", children=children)
 
 
-def graph_card(graph_id: str, class_name: str = "") -> html.Div:
+def graph_card(graph_id: str, class_name: str = "", height: str = "380px") -> html.Div:
     classes = "chart-card"
     if class_name:
         classes = f"{classes} {class_name}"
@@ -38,6 +38,7 @@ def graph_card(graph_id: str, class_name: str = "") -> html.Div:
             config=GRAPH_CONFIG,
             responsive=True,
             className="chart-graph",
+            style={"height": height},
         ),
     )
 

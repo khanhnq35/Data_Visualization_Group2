@@ -107,13 +107,13 @@ def layout() -> html.Div:
             html.Div(
                 className="chart-grid two-column",
                 children=[
-                    graph_card("overview-scale-chart", "chart-large"),
-                    graph_card("overview-avg-goals-chart"),
+                    graph_card("overview-scale-chart", "chart-large", height="620px"),
+                    graph_card("overview-avg-goals-chart", height="400px"),
                 ],
             ),
             html.Div(
                 className="chart-grid single-column",
-                children=graph_card("overview-champion-timeline", "chart-wide"),
+                children=graph_card("overview-champion-timeline", "chart-wide", height="440px"),
             ),
         ],
     )
@@ -261,14 +261,21 @@ def _champion_timeline_figure(df: pd.DataFrame) -> go.Figure:
             )
         )
 
+    fig = apply_chart_layout(fig, height=440)
     fig.update_layout(
         title="Lịch sử nhà vô địch World Cup (1930–2022)",
         showlegend=True,
-        margin={"l": 90, "r": 24, "t": 64, "b": 72},
+        margin={"l": 130, "r": 24, "t": 64, "b": 72},
     )
     fig.update_xaxes(title="Năm")
-    fig.update_yaxes(title="Nhà vô địch")
-    return apply_chart_layout(fig, height=440)
+    fig.update_yaxes(
+        title={
+            "text": "Nhà vô địch",
+            "standoff": 30
+        },
+        automargin=True
+    )
+    return fig
 
 
 def register_callbacks(app) -> None:

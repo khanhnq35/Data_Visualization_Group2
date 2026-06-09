@@ -263,7 +263,7 @@ def layout() -> html.Div:
             html.Div(
                 className="chart-grid single-column",
                 children=[
-                    graph_card("dominance-goals-for-chart", "chart-wide"),
+                    graph_card("dominance-goals-for-chart", "chart-wide", height="450px"),
                 ],
             ),
             html.Div(

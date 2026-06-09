@@ -154,9 +154,9 @@ def layout() -> html.Div:
             html.Div(
                 className="chart-grid upsets-chart-grid",
                 children=[
-                    graph_card("upsets-scatter-plot", "chart-large"),
-                    graph_card("upsets-bar-chart"),
-                    graph_card("upsets-stacked-bar"),
+                    graph_card("upsets-scatter-plot", "chart-large", height="480px"),
+                    graph_card("upsets-bar-chart", height="360px"),
+                    graph_card("upsets-stacked-bar", height="360px"),
                 ],
             ),
             html.Div(id="upsets-detail-container", className="upsets-detail-panel"),
