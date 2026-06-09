@@ -132,11 +132,11 @@ def create_app() -> Dash:
     return app
 
 
-app = create_app()
-server = app.server
+dash_app = create_app()
+app = dash_app.server
 
 
 if __name__ == "__main__":
     import os
     port = int(os.environ.get("PORT", 8050))
-    app.run(debug=False, port=port)
+    dash_app.run(debug=False, port=port)
