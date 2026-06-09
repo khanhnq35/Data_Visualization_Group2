@@ -445,7 +445,7 @@ def register_callbacks(app) -> None:
                 sc_df, x="Goals For", y="Goals Against",
                 color="position_group", color_discrete_map=POS_COLORS,
                 text="DisplayLabel", size="Points", size_max=28,
-                title=f"Tấn công vs Phòng ngự — {year}",
+                title=f"Bàn ghi vs Bàn thủng — {year}",
                 labels={"position_group": "Nhóm", "Goals For": "Bàn ghi", "Goals Against": "Bàn thủng"},
                 custom_data=["Team", "Points", "Games Played", "Label"],
             )
