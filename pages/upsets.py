@@ -192,47 +192,16 @@ def _filter_matches(
 
 def _filtered_options(
     year_range: list[int] | None,
-    tournament: str | None,
-    team: str | None,
-    continent: str | None,
 ) -> tuple[list[dict[str, str]], list[dict[str, str]], list[dict[str, str]]]:
     df = load_upsets_data()
     if year_range and len(year_range) == 2:
         df = df[(df["year"] >= year_range[0]) & (df["year"] <= year_range[1])]
 
-    tournament_df = df.copy()
-    if team:
-        tournament_df = tournament_df[
-            (tournament_df["home_team"] == team) | (tournament_df["away_team"] == team)
-        ]
-    if continent:
-        tournament_df = tournament_df[
-            (tournament_df["home_team_continent"] == continent)
-            | (tournament_df["away_team_continent"] == continent)
-        ]
-
-    team_df = df.copy()
-    if tournament:
-        team_df = team_df[team_df["tournament"] == tournament]
-    if continent:
-        team_df = team_df[
-            (team_df["home_team_continent"] == continent)
-            | (team_df["away_team_continent"] == continent)
-        ]
-
-    continent_df = df.copy()
-    if tournament:
-        continent_df = continent_df[continent_df["tournament"] == tournament]
-    if team:
-        continent_df = continent_df[
-            (continent_df["home_team"] == team) | (continent_df["away_team"] == team)
-        ]
-
     return (
-        _option_list(tournament_df["tournament"]),
-        _option_list(pd.concat([team_df["home_team"], team_df["away_team"]])),
+        _option_list(df["tournament"]),
+        _option_list(pd.concat([df["home_team"], df["away_team"]])),
         _option_list(
-            pd.concat([continent_df["home_team_continent"], continent_df["away_team_continent"]])
+            pd.concat([df["home_team_continent"], df["away_team_continent"]])
         ),
     )
 
@@ -438,12 +407,9 @@ def register_callbacks(app) -> None:
         Output("upsets-team-dropdown", "options"),
         Output("upsets-continent-dropdown", "options"),
         Input("upsets-year-slider", "value"),
-        Input("upsets-tournament-dropdown", "value"),
-        Input("upsets-team-dropdown", "value"),
-        Input("upsets-continent-dropdown", "value"),
     )
-    def update_dropdown_options(year_range, tournament, team, continent):
-        return _filtered_options(year_range, tournament, team, continent)
+    def update_dropdown_options(year_range):
+        return _filtered_options(year_range)
 
     @app.callback(
         Output("upsets-year-slider-label", "children"),
